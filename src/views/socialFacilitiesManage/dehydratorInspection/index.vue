@@ -307,6 +307,19 @@
       component: 'Input',
       colProps: { span: 6 },
     },
+    {
+      field: 'status',
+      label: '检查状态',
+      component: 'Select',
+      componentProps: {
+        options: [
+          { label: '未检查', value: '0' },
+          { label: '已检查', value: '1' },
+        ],
+        allowClear: true,
+      },
+      colProps: { span: 6 },
+    },
   ];
 
   onMounted(() => {
