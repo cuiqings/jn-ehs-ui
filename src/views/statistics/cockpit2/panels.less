@@ -1,0 +1,69 @@
+/* ======== 面板基础 ======== */
+.cockpit2 .panel {
+  position: relative;
+  min-height: 0;
+  background: linear-gradient(180deg, var(--panel-a), var(--panel-b));
+  border: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.cockpit2 .panel::before,
+.cockpit2 .panel::after {
+  content: '';
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  pointer-events: none;
+}
+
+.cockpit2 .panel::before { top: 0; left: 0; border-top: 1.5px solid var(--primary); border-left: 1.5px solid var(--primary); }
+.cockpit2 .panel::after { bottom: 0; right: 0; border-bottom: 1.5px solid var(--primary); border-right: 1.5px solid var(--primary); }
+
+.cockpit2 .panel .tr-corner,
+.cockpit2 .panel .bl-corner {
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  pointer-events: none;
+}
+
+.cockpit2 .panel .tr-corner { top: 0; right: 0; border-top: 1.5px solid var(--primary); border-right: 1.5px solid var(--primary); }
+.cockpit2 .panel .bl-corner { bottom: 0; left: 0; border-bottom: 1.5px solid var(--primary); border-left: 1.5px solid var(--primary); }
+
+.cockpit2 .panel .hd {
+  position: relative;
+  padding: 8px 14px 8px 22px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 2px;
+  border-bottom: 1px solid var(--line);
+  background: linear-gradient(90deg, rgba(79, 195, 247, 0.14), rgba(79, 195, 247, 0) 75%);
+  display: flex;
+  align-items: center;
+}
+
+.cockpit2 .panel .hd::before {
+  content: '';
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  width: 4px;
+  height: 16px;
+  transform: translateY(-50%);
+  background: linear-gradient(180deg, var(--cyan), var(--primary));
+  box-shadow: 0 0 8px var(--primary);
+}
+
+.cockpit2 .panel .hd .rt { margin-left: auto; font-size: 12px; font-weight: 400; color: var(--text-3); letter-spacing: 1px; }
+.cockpit2 .panel .bd { flex: 1; min-height: 0; overflow: hidden; display: flex; flex-direction: column; padding: 12px 14px; }
+
+/* 面板跨度 */
+.cockpit2 .p-gauge { grid-column: span 3; grid-row: span 1; }
+.cockpit2 .p-map { grid-column: span 6; grid-row: span 2; }
+.cockpit2 .p-tasks { grid-column: span 3; grid-row: span 1; }
+.cockpit2 .p-rank { grid-column: span 3; grid-row: span 1; }
+.cockpit2 .p-works { grid-column: span 3; grid-row: span 1; }
+.cockpit2 .p-culture { grid-column: 1 / -1; grid-row: 4; }

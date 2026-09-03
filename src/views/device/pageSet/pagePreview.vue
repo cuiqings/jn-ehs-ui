@@ -1,0 +1,101 @@
+<template>
+  <div class="pre-wrap">
+    <!-- <button @click="exportPng()">sdsdsd</button> -->
+    <topo-preview ref="topoPreview" :showApv="false" />
+  </div>
+</template>
+
+<script lang="ts" setup>
+  import { ref, onMounted, onUnmounted,nextTick } from 'vue';
+  import TopoPreview from '/@/components/AntdvTopo/preview.vue';
+  import { defHttp } from '/@/utils/http/axios';
+  import { useRoute } from 'vue-router';
+  const route = useRoute();
+  const queryData = ref(route.query);
+  const topoPreview = ref();
+  const apiData = ref([]);
+  const timer = ref();
+
+  getData();
+  onMounted(() => {
+    timer.value = setInterval(() => {
+      getData();
+    }, 30000);
+  });
+  onUnmounted(() => {
+    clearInterval(timer.value);
+  });
+  function getData() {
+    if (queryData.value.id) {
+      const params = {
+        pageId: queryData.value.id,
+      };
+      defHttp.get({ url: '/deviceConfiguration/getAssembly', params }).then((res) => {
+        console.log('getAssembly res', res);
+        apiData.value = res || [];
+        resetGraphData();
+      });
+    } else {
+      resetGraphData();
+    }
+  }
+  function resetGraphData() {
+    const graphCellNode: any = localStorage.getItem('graphCellNode');
+    const { graphOpts, cellsOpts } = JSON.parse(graphCellNode);
+    // const {apiUrl = ''} = graphOpts || {}
+    console.log(cellsOpts, '0000000');
+    const jsonTemp = cellsOpts.map((item) => {
+      const { type, limit, maxLimit, minLimit, lessLimit, moreLimit } = item.data || {};
+      // const field = 'attr'
+      const curData: any = apiData.value.filter((v: any) => v.compId === item.id)[0] || '';
+      const maxVal = limit + maxLimit;
+      const minVal = limit - minLimit;
+      console.log('curData', curData);
+      if (curData) {
+        item.data.apiData = curData;
+        switch (type) {
+          case 'pathImage':
+            if (Number(curData.value) >= maxVal || Number(curData.value) <= minVal) {
+              item.attrs.body.fill = moreLimit;
+            } else {
+              item.attrs.body.fill = lessLimit;
+            }
+            item.attrs.body.style.cursor = 'pointer';
+            break;
+          case 'textBlock':
+            if (Number(curData.value) >= maxVal || Number(curData.value) <= minVal) {
+              item.attrs.foreignObject.color = moreLimit;
+            } else {
+              item.attrs.foreignObject.color = lessLimit;
+            }
+            item.attrs.label.style.cursor = 'pointer';
+            break;
+          case 'textField':
+            item.attrs.label.text = curData.value + curData.unit;
+            if (Number(curData.value) >= maxVal || Number(curData.value) <= minVal) {
+              item.attrs.foreignObject.color = moreLimit;
+            } else {
+              item.attrs.foreignObject.color = lessLimit;
+            }
+            item.attrs.label.style.cursor = 'pointer';
+            break;
+        }
+      }
+      return item;
+    });
+    console.log(jsonTemp, 'jsonTemp');
+    nextTick(() => {
+      topoPreview.value.initGraph({
+      graphOpts,
+      cellsOpts: jsonTemp,
+    });
+    })
+  }
+</script>
+
+<style scoped lang="less">
+  .pre-wrap {
+    background-color: #fff;
+    height: 100vh;
+  }
+</style>

@@ -1,0 +1,220 @@
+/* ======== 关键数据 ======== */
+.cockpit2 .tasks-grid { display: grid; grid-template-columns: repeat(2, 1fr); grid-template-rows: 1fr 1fr auto; gap: 4px; height: 100%; }
+.cockpit2 .task-card {
+  padding: 2px 8px;
+  background: rgba(79, 195, 247, 0.06);
+  border: 1px solid rgba(79, 195, 247, 0.22);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  position: relative; min-height: 0; overflow: hidden; gap: 1px;
+}
+.cockpit2 .task-card::before { content: ''; position: absolute; left: 0; top: 0; width: 6px; height: 6px; border-top: 1px solid var(--primary); border-left: 1px solid var(--primary); }
+.cockpit2 .task-card::after { content: ''; position: absolute; right: 0; bottom: 0; width: 6px; height: 6px; border-bottom: 1px solid var(--primary); border-right: 1px solid var(--primary); }
+.cockpit2 .task-card .tname { font-size: 11px; color: var(--text-3); letter-spacing: 1px; flex-shrink: 0; line-height: 1.2; }
+.cockpit2 .task-body { display: flex; align-items: center; gap: 8px; }
+.cockpit2 .circle-prog { position: relative; width: 38px; height: 38px; flex-shrink: 0; }
+.cockpit2 .circle-prog .pct {
+  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  font-size: 10px; font-weight: 800; color: var(--primary-2);
+  font-family: 'SF Mono', Consolas, monospace;
+}
+.cockpit2 .task-nums { display: flex; flex-direction: column; gap: 2px; font-size: 11px; color: var(--text-3); line-height: 1.4; }
+.cockpit2 .task-nums b { color: var(--text); font-weight: 700; margin-left: 3px; font-size: 12px; }
+.cockpit2 .task-nums .done b { color: var(--ok); }
+.cockpit2 .bar-card { grid-column: span 2; align-items: stretch; padding: 4px 10px; }
+.cockpit2 .bar-card .tname { text-align: center; margin-bottom: 3px; }
+.cockpit2 .bar-stack {
+  display: flex; height: 16px; overflow: hidden;
+  background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(79, 195, 247, 0.25);
+}
+.cockpit2 .bar-stack > div {
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; font-weight: 800; color: var(--bg-0);
+}
+.cockpit2 .bar-stack .b1 { background: var(--primary); }
+.cockpit2 .bar-stack .b2 { background: var(--primary-2); }
+.cockpit2 .bar-stack .b3 { background: var(--cyan); }
+.cockpit2 .bar-legend { display: flex; gap: 8px; font-size: 10.5px; color: var(--text-3); justify-content: center; margin-top: 5px; flex-wrap: wrap; }
+.cockpit2 .bar-legend .li { display: flex; align-items: center; gap: 3px; }
+.cockpit2 .bar-legend .li i { width: 8px; height: 8px; display: inline-block; }
+.cockpit2 .bar-legend b { color: var(--primary-2); font-weight: 800; }
+
+/* ======== 危险作业 ======== */
+.cockpit2 .p-works .bd { padding: 0; }
+.cockpit2 .works-tabs {
+  display: flex; gap: 10px; padding: 6px 14px;
+  border-bottom: 1px solid var(--line);
+  font-size: 11.5px; color: var(--text-3);
+}
+.cockpit2 .works-tabs .t b { font-weight: 800; margin: 0 3px; font-variant-numeric: tabular-nums; }
+.cockpit2 .works-tabs .t.working b { color: var(--ok); }
+.cockpit2 .works-tabs .t.approving b { color: var(--warn); }
+.cockpit2 .works-tabs .t.pending b { color: var(--cyan); }
+.cockpit2 .works-tabs .t.interrupt b { color: var(--danger); }
+.cockpit2 .work-grid { flex: 1; overflow: hidden; position: relative; }
+.cockpit2 .work-inner {
+  display: flex; flex-direction: column; gap: 6px;
+  padding: 8px 12px;
+  animation: vscroll linear infinite;
+}
+@keyframes vscroll { 0% { transform: translateY(0); } 100% { transform: translateY(-50%); } }
+.cockpit2 .work-item {
+  padding: 7px 10px;
+  background: linear-gradient(90deg, rgba(79, 195, 247, 0.08), rgba(79, 195, 247, 0.01));
+  border-left: 3px solid var(--primary);
+  font-size: 12px;
+}
+.cockpit2 .work-item.status-working { border-left-color: var(--ok); }
+.cockpit2 .work-item.status-approving { border-left-color: var(--warn); }
+.cockpit2 .work-item.status-pending { border-left-color: var(--cyan); }
+.cockpit2 .work-item.status-interrupted { border-left-color: var(--danger); }
+.cockpit2 .work-item .line1 { display: flex; align-items: center; gap: 8px; margin-bottom: 3px; }
+.cockpit2 .work-item .code { font-family: 'SF Mono', Consolas, monospace; font-size: 10.5px; color: var(--text-3); }
+.cockpit2 .work-item .name { flex: 1; font-weight: 700; color: #fff; font-size: 12.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cockpit2 .work-item .status-chip { font-size: 10.5px; padding: 1px 8px; font-weight: 700; }
+.cockpit2 .work-item.status-working .status-chip { background: rgba(74, 222, 128, 0.15); color: var(--ok); border: 1px solid rgba(74, 222, 128, 0.4); }
+.cockpit2 .work-item.status-approving .status-chip { background: rgba(255, 167, 38, 0.15); color: var(--warn); border: 1px solid rgba(255, 167, 38, 0.4); }
+.cockpit2 .work-item.status-pending .status-chip { background: rgba(0, 229, 255, 0.15); color: var(--cyan); border: 1px solid rgba(0, 229, 255, 0.4); }
+.cockpit2 .work-item.status-interrupted .status-chip { background: rgba(239, 83, 80, 0.15); color: var(--danger); border: 1px solid rgba(239, 83, 80, 0.45); }
+.cockpit2 .work-item .line2 { font-size: 11px; color: var(--text-3); display: flex; flex-wrap: wrap; gap: 4px 10px; }
+.cockpit2 .work-item .line2 em { font-style: normal; color: var(--text-2); }
+.cockpit2 .work-item .line2 .sep { color: var(--muted); }
+.cockpit2 .work-item .level-badge { font-size: 10px; padding: 0 5px; border-radius: 2px; font-weight: 700; background: rgba(0, 229, 255, 0.12); color: var(--cyan); border: 1px solid rgba(0, 229, 255, 0.35); white-space: nowrap; }
+
+/* ======== 文化 ======== */
+.cockpit2 .p-culture .bd { padding: 0; display: flex; flex-direction: row; }
+.cockpit2 .culture-tabs {
+  flex-shrink: 0; width: 110px;
+  padding: 10px 8px; border-right: 1px solid var(--line);
+  display: flex; flex-direction: column; gap: 4px;
+  background: linear-gradient(180deg, rgba(79, 195, 247, 0.08), transparent);
+}
+.cockpit2 .culture-tab {
+  padding: 8px 10px; font-size: 12px; color: var(--text-3); cursor: pointer;
+  background: rgba(79, 195, 247, 0.04); border: 1px solid var(--line);
+  letter-spacing: 2px; transition: all 0.2s;
+}
+.cockpit2 .culture-tab:hover { color: var(--text-2); }
+.cockpit2 .culture-tab.active {
+  color: #fff; font-weight: 800;
+  background: linear-gradient(135deg, var(--primary-d), var(--primary));
+  border-color: var(--primary);
+  box-shadow: 0 0 12px rgba(79, 195, 247, 0.4);
+}
+.cockpit2 .culture-row { flex: 1; display: flex; overflow: hidden; gap: 0; padding: 8px; }
+.cockpit2 .culture-item {
+  flex: 1 1 0; min-width: 0;
+  padding: 8px 12px; margin-right: 8px;
+  background: rgba(79, 195, 247, 0.05);
+  border: 1px solid var(--line);
+  border-top: 2px solid var(--primary);
+  display: flex; flex-direction: column; justify-content: space-between;
+  font-size: 12px;
+}
+.cockpit2 .culture-item:last-child { margin-right: 0; }
+.cockpit2 .culture-item .tt { color: #fff; font-weight: 700; font-size: 13px; display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
+.cockpit2 .culture-item .tt .h { flex: 1; min-width: 0; white-space: normal; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; text-overflow: ellipsis; }
+.cockpit2 .culture-item .source-tag { font-size: 10px; padding: 1px 6px; border-radius: 2px; font-weight: 700; white-space: nowrap; flex-shrink: 0; }
+.cockpit2 .culture-item .source-tag.src-0 { background: rgba(239, 83, 80, 0.15); color: var(--danger); border: 1px solid rgba(239, 83, 80, 0.4); }
+.cockpit2 .culture-item .source-tag.src-1 { background: rgba(79, 195, 247, 0.15); color: var(--cyan); border: 1px solid rgba(79, 195, 247, 0.4); }
+.cockpit2 .culture-item .source-tag.src-2 { background: rgba(255, 167, 38, 0.15); color: var(--warn); border: 1px solid rgba(255, 167, 38, 0.4); }
+.cockpit2 .culture-item .desc { color: var(--text-3); font-size: 11.5px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; flex: 1; }
+.cockpit2 .culture-item .culture-date { font-size: 10.5px; color: var(--text-3); margin-top: 4px; text-align: right; }
+
+/* ======== 弹窗 ======== */
+.cockpit2 .modal-mask {
+  position: fixed; inset: 0; z-index: 100;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex; align-items: center; justify-content: center;
+}
+.cockpit2 .modal-box {
+  width: 520px; max-height: 80vh;
+  background: linear-gradient(180deg, var(--panel-a), var(--panel-b));
+  border: 1px solid var(--line-2);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 40px rgba(79, 195, 247, 0.15);
+}
+.cockpit2 .modal-hd {
+  padding: 14px 18px; font-size: 16px; font-weight: 700; color: #fff;
+  border-bottom: 1px solid var(--line);
+  display: flex; justify-content: space-between; align-items: center;
+}
+.cockpit2 .modal-hd .close { cursor: pointer; font-size: 22px; color: var(--text-3); }
+.cockpit2 .modal-hd .close:hover { color: #fff; }
+.cockpit2 .modal-bd { padding: 18px; font-size: 14px; color: var(--text-2); line-height: 1.8; overflow-y: auto; max-height: 60vh; }
+
+/* 天气弹窗 */
+.cockpit2 .weather-modal { width: 560px; }
+.cockpit2 .weather-detail {
+  padding: 12px 0 16px;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 16px;
+}
+.cockpit2 .weather-detail-row {
+  display: flex; align-items: center;
+  padding: 6px 0; font-size: 13px;
+}
+.cockpit2 .weather-detail-row .label { color: var(--text-3); width: 80px; text-align: right; margin-right: 20px; }
+.cockpit2 .weather-detail-row .value { color: var(--primary-2); font-weight: 700; text-align: left; }
+.cockpit2 .weather-form .form-title {
+  font-size: 14px; font-weight: 700; color: #fff;
+  margin-bottom: 12px; padding-bottom: 8px;
+  border-bottom: 1px solid var(--line);
+}
+.cockpit2 .weather-form .form-row {
+  display: flex; align-items: flex-start; gap: 12px; margin-bottom: 12px;
+}
+.cockpit2 .weather-form .form-label {
+  width: 70px; flex-shrink: 0; font-size: 13px; color: var(--text-3);
+  line-height: 32px;
+}
+.cockpit2 .weather-form .form-inputs {
+  display: flex; align-items: center; gap: 8px; flex: 1;
+}
+.cockpit2 .weather-form .form-sep { color: var(--text-3); font-size: 12px; }
+.cockpit2 .weather-form .form-date-range {
+  flex: 1;
+}
+.cockpit2 .weather-form .form-date-range.ant-picker,
+.cockpit2 .weather-form .ant-picker {
+  background: transparent !important;
+  border: 1px solid var(--line-2);
+  width: 100%;
+}
+.cockpit2 .weather-form .ant-picker-input > input {
+  color: var(--text) !important;
+  font-size: 13px;
+}
+.cockpit2 .weather-form .ant-picker-suffix,
+.cockpit2 .weather-form .ant-picker-separator {
+  color: var(--text-3) !important;
+}
+.cockpit2 .weather-form .ant-picker-clear {
+  background: transparent !important;
+  color: var(--text-3);
+}
+.cockpit2 .weather-form .ant-picker-active-bar {
+  background: var(--primary);
+}
+.cockpit2 .weather-form .form-textarea {
+  flex: 1; width: 100%; min-height: 72px; padding: 8px 10px;
+  background: rgba(79, 195, 247, 0.06);
+  border: 1px solid var(--line-2);
+  color: var(--text); font-size: 13px;
+  resize: vertical; outline: none;
+}
+.cockpit2 .weather-form .form-textarea:focus { border-color: var(--primary); }
+.cockpit2 .weather-form .form-actions {
+  display: flex; justify-content: flex-end; gap: 10px; margin-top: 16px;
+}
+.cockpit2 .weather-form .btn-cancel {
+  padding: 6px 18px; font-size: 13px;
+  background: transparent; border: 1px solid var(--line-2);
+  color: var(--text-2); cursor: pointer;
+}
+.cockpit2 .weather-form .btn-cancel:hover { border-color: var(--primary); color: #fff; }
+.cockpit2 .weather-form .btn-save {
+  padding: 6px 18px; font-size: 13px;
+  background: linear-gradient(135deg, var(--primary-d), var(--primary));
+  border: 1px solid var(--primary);
+  color: #fff; font-weight: 700; cursor: pointer;
+}
+.cockpit2 .weather-form .btn-save:hover { box-shadow: 0 0 12px rgba(79, 195, 247, 0.4); }

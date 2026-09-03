@@ -1,0 +1,348 @@
+/* ======== 全局 · 蓝色大屏科技风 ======== */
+.cockpit2 {
+  --bg-0: #030b1d;
+  --bg-1: #06173a;
+  --bg-2: #0a2352;
+  --line: rgba(79, 195, 247, 0.18);
+  --line-2: rgba(79, 195, 247, 0.42);
+  --glass: rgba(10, 30, 65, 0.55);
+  --panel-a: rgba(6, 23, 58, 0.82);
+  --panel-b: rgba(10, 35, 82, 0.6);
+  --primary: #4fc3f7;
+  --primary-2: #81d4fa;
+  --primary-3: #00b0ff;
+  --primary-d: #1565c0;
+  --cyan: #00e5ff;
+  --amber: #fbc02d;
+  --ok: #4ade80;
+  --warn: #ffa726;
+  --danger: #ef5350;
+  --text: #e7f3ff;
+  --text-2: #a4c6ef;
+  --text-3: #6e93b8;
+  --muted: #3e5c83;
+
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 100;
+  font-family: -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+  display: flex;
+  flex-direction: column;
+  background:
+    radial-gradient(ellipse at 20% 0%, rgba(25, 118, 210, 0.25) 0%, transparent 55%),
+    radial-gradient(ellipse at 80% 10%, rgba(0, 176, 255, 0.18) 0%, transparent 60%),
+    radial-gradient(ellipse at 50% 100%, rgba(25, 118, 210, 0.18) 0%, transparent 70%),
+    linear-gradient(180deg, #030b1d 0%, #071430 50%, #030b1d 100%);
+  position: relative;
+}
+
+.cockpit2::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  background-image:
+    linear-gradient(rgba(79, 195, 247, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(79, 195, 247, 0.04) 1px, transparent 1px);
+  background-size: 60px 60px;
+  mask-image: radial-gradient(ellipse at center, #000 40%, transparent 90%);
+  -webkit-mask-image: radial-gradient(ellipse at center, #000 40%, transparent 90%);
+}
+
+/* ======== 顶部栏 ======== */
+.cockpit2 .topbar {
+  position: relative;
+  z-index: 5;
+  height: 48px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 0 22px;
+  background: linear-gradient(180deg, rgba(10, 35, 82, 0.9), rgba(6, 23, 58, 0.7));
+  border-bottom: 1px solid var(--line);
+}
+
+.cockpit2 .topbar::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent 8%, var(--primary) 50%, transparent 92%);
+  opacity: 0.7;
+}
+
+.cockpit2 .brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-right: 18px;
+  border-right: 1px solid var(--line);
+  height: 30px;
+}
+
+.cockpit2 .brand .dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--primary);
+  box-shadow: 0 0 10px var(--primary), 0 0 20px var(--primary-3);
+}
+
+.cockpit2 .brand .name {
+  font-size: 14px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 2px;
+}
+
+.cockpit2 .brand .name b {
+  color: #4FC3F7;
+  font-weight: 800;
+}
+
+.cockpit2 .weather {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--text-2);
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.cockpit2 .weather .tag {
+  font-size: 11.5px;
+  padding: 3px 10px;
+  font-weight: 700;
+  background: rgba(255, 167, 38, 0.12);
+  color: var(--warn);
+  border: 1px solid rgba(255, 167, 38, 0.4);
+}
+
+.cockpit2 .weather .weather-info {
+  font-size: 12.5px;
+  color: var(--text-2);
+}
+
+.cockpit2 .marquee-wrap {
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  border-left: 1px solid var(--line);
+  padding: 0 14px;
+}
+
+.cockpit2 .marquee {
+  display: flex;
+  gap: 22px;
+  white-space: nowrap;
+  animation: mq 65s linear infinite;
+}
+
+@keyframes mq {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+.cockpit2 .chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  padding: 3px 12px;
+  background: rgba(10, 35, 82, 0.6);
+  border: 1px solid var(--line);
+  color: var(--text-2);
+  cursor: pointer;
+}
+
+.cockpit2 .chip.idea { color: var(--primary-2); border-color: rgba(79, 195, 247, 0.4); }
+.cockpit2 .chip.tip { color: var(--cyan); border-color: rgba(0, 229, 255, 0.35); }
+.cockpit2 .chip.warn { color: var(--warn); border-color: rgba(255, 167, 38, 0.4); }
+.cockpit2 .chip:hover { background: rgba(79, 195, 247, 0.14); color: #fff; }
+
+.cockpit2 .chip::before {
+  content: '';
+  width: 5px;
+  height: 5px;
+  background: var(--primary);
+}
+
+.cockpit2 .chip.tip::before { background: var(--cyan); }
+.cockpit2 .chip.warn::before { background: var(--warn); }
+
+.cockpit2 .datetime {
+  font-size: 13px;
+  color: var(--primary-2);
+  font-family: 'SF Mono', Consolas, monospace;
+  padding-left: 14px;
+  border-left: 1px solid var(--line);
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.cockpit2 .back-btn {
+  margin-left: 12px;
+  padding: 4px 14px;
+  font-size: 12px;
+  color: var(--primary-2);
+  border: 1px solid var(--primary-2);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+  &:hover {
+    background: var(--primary-2);
+    color: #0a1628;
+  }
+}
+
+/* ======== 标题 ======== */
+.cockpit2 .header {
+  position: relative;
+  z-index: 5;
+  padding: 4px 22px 2px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.cockpit2 .header h1 {
+  display: inline-block;
+  font-size: 30px;
+  font-weight: 900;
+  letter-spacing: 18px;
+  background: linear-gradient(180deg, #ffffff 0%, #8ed9fb 60%, #4fc3f7 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  position: relative;
+  padding: 0 60px;
+}
+
+.cockpit2 .header h1::before,
+.cockpit2 .header h1::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: 44px;
+  height: 14px;
+  transform: translateY(-50%);
+  background:
+    linear-gradient(90deg, transparent, var(--primary) 50%, var(--cyan)) no-repeat center / 100% 1.5px;
+  clip-path: polygon(0 45%, 62% 45%, 62% 0, 78% 50%, 62% 100%, 62% 55%, 0 55%);
+}
+
+.cockpit2 .header h1::before {
+  left: 0;
+  transform: translateY(-50%) scaleX(-1);
+}
+
+.cockpit2 .header h1::after {
+  right: 0;
+}
+
+/* ======== 主体布局 ======== */
+.cockpit2 .main {
+  position: relative;
+  z-index: 5;
+  padding: 0 22px 10px;
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-rows: 9% 1fr 1fr 22%;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 10px;
+}
+
+/* KPI */
+.cockpit2 .kpi-row {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 10px;
+}
+
+.cockpit2 .kpi {
+  position: relative;
+  background: linear-gradient(135deg, rgba(79, 195, 247, 0.08) 0%, rgba(10, 35, 82, 0.85) 60%);
+  border: 1px solid var(--line-2);
+  padding: 8px 12px 6px;
+  clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.cockpit2 .kpi::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: linear-gradient(180deg, var(--primary), var(--primary-d));
+  box-shadow: 0 0 10px var(--primary);
+}
+
+.cockpit2 .kpi .lbl {
+  font-size: 11px;
+  color: var(--text-3);
+  letter-spacing: 1px;
+  margin-bottom: 2px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.cockpit2 .kpi .lbl .trend { font-size: 10px; font-weight: 700; }
+.cockpit2 .kpi .lbl .trend.up { color: var(--ok); }
+.cockpit2 .kpi .lbl .trend.down { color: var(--danger); }
+
+.cockpit2 .kpi .row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.cockpit2 .kpi .val {
+  font-size: 22px;
+  font-weight: 900;
+  color: var(--primary-2);
+  font-family: 'SF Mono', Consolas, monospace;
+  line-height: 1;
+  text-shadow: 0 0 12px rgba(79, 195, 247, 0.4);
+  letter-spacing: 1px;
+}
+
+.cockpit2 .kpi .val .unit {
+  font-size: 11px;
+  color: var(--text-3);
+  font-weight: 500;
+  margin-left: 2px;
+}
+
+.cockpit2 .kpi .sub {
+  margin-top: 2px;
+  font-size: 10.5px;
+  color: var(--text-3);
+}
+
+.cockpit2 .kpi .sub b {
+  color: var(--text-2);
+  font-weight: 700;
+  margin: 0 2px;
+}

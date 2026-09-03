@@ -1,0 +1,144 @@
+<template>
+  <van-popup position="bottom" round v-model:show="show" :style="{ height: 'auto' }">
+    <div class="title">答题卡</div>
+    <div class="number-box">
+      <div v-for="(item, i) in questionList" :class="item.answer ? 'act-num-item' : 'num-item'" key="{i}" @click="goQuestion(i)">{{ i + 1 }}</div>
+    </div>
+    <div class="btn-box">
+      <a-button class="confirm-btn" @click="onSuccess()">提交试卷</a-button>
+    </div>
+  </van-popup>
+</template>
+<script lang="ts" setup>
+  import { ref } from 'vue';
+  const props = defineProps({
+    questionList: {
+      type: Array,
+      default: () => [],
+    },
+  });
+
+  const emits = defineEmits(['onSuccess', 'goQuestion']);
+
+  const goQuestion = (index: number) => {
+    emits('goQuestion', index);
+    close();
+  };
+  const show = ref(false);
+
+  const open = () => {
+    show.value = true;
+  };
+
+  const close = () => {
+    show.value = false;
+  };
+
+  const onSuccess = () => {
+    emits('onSuccess');
+  }
+  defineExpose({
+    open,
+    close,
+  });
+</script>
+
+<style lang="less" scoped>
+  .title {
+    width: 100%;
+    height: auto;
+    font-size: 16px;
+    font-weight: 500;
+    color: rgba(0, 0, 0, 0.88);
+    line-height: 16px;
+    box-sizing: border-box;
+    padding: 30px 20px;
+  }
+
+  .result-box {
+    width: 100%;
+    max-height: 494px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    display: grid;
+    row-gap: 20px;
+    column-gap: 19px;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    box-sizing: border-box;
+    padding: 0px 20px 30px 20px;
+    .num-item {
+      width: 40px;
+      height: 40px;
+      background: #1890ff;
+      border-radius: 50%;
+      font-size: 16px;
+      line-height: 40px;
+      font-weight: 500;
+      text-align: center;
+      color: #ffffff;
+    }
+    .act-num-item {
+      width: 40px;
+      height: 40px;
+      background: #04c877;
+      border-radius: 50%;
+      font-size: 16px;
+      line-height: 40px;
+      font-weight: 500;
+      text-align: center;
+      color: #ffffff;
+    }
+  }
+  .number-box {
+    width: 100%;
+    max-height: 410px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    display: grid;
+    row-gap: 20px;
+    column-gap: 19px;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    box-sizing: border-box;
+    padding: 0px 20px 30px 20px;
+    .num-item {
+      width: 40px;
+      height: 40px;
+      border: 2px solid rgba(0, 0, 0, 0.1);
+      border-radius: 50%;
+      font-size: 16px;
+      line-height: 40px;
+      font-weight: 500;
+      text-align: center;
+      color: rgba(0, 0, 0, 0.45);
+    }
+    .act-num-item {
+      width: 40px;
+      height: 40px;
+      background: rgba(24, 144, 255, 0.15);
+      border-radius: 50%;
+      font-size: 16px;
+      line-height: 40px;
+      font-weight: 500;
+      text-align: center;
+      color: #1890ff;
+    }
+  }
+
+  .btn-box {
+    width: 100%;
+    height: 84px;
+    box-sizing: border-box;
+    padding: 20px;
+    .confirm-btn {
+      width: 100%;
+      height: 44px;
+      box-sizing: border-box;
+      background: #1890ff;
+      border-radius: 25px;
+      font-size: 16px;
+      font-weight: 500;
+      color: #ffffff;
+      border: none;
+    }
+  }
+</style>

@@ -1,0 +1,27 @@
+.p-l-status{
+  &::before{
+    content: '';
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #fff;
+    margin-right: 4px;
+  }
+  &.t-status-0 {
+    &::before{
+      background: #3E87F8;
+    }
+  }
+  &.t-status-1 {
+    &::before{
+      background: #09C199;
+    }
+  }
+  &.t-status-2 {
+    &::before{
+      background: #CD2B1D;
+    }
+  }
+}
+
