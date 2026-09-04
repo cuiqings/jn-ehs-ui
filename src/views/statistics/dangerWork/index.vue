@@ -319,6 +319,21 @@
                 record.cjZrShouldCheckNumTwo > 0 ? record.cjZrCheckRatioTwo : '-'
               }}</span>
             </template>
+            <template v-if="column.key === 'bzzShouldCheckNumTwo'">
+              <span :style="{ color: comparePercent(record.bzzCheckRatioTwo, '100%') == -1 && record.bzzShouldCheckNumTwo > 0 ? '#ff4d4f' : '' }">{{
+                record.bzzShouldCheckNumTwo
+              }}</span>
+            </template>
+            <template v-if="column.key === 'bzzCheckNumTwo'">
+              <span :style="{ color: comparePercent(record.bzzCheckRatioTwo, '100%') == -1 && record.bzzShouldCheckNumTwo > 0 ? '#ff4d4f' : '' }">{{
+                record.bzzCheckNumTwo
+              }}</span>
+            </template>
+            <template v-if="column.key === 'bzzCheckRatioTwo'">
+              <span :style="{ color: comparePercent(record.bzzCheckRatioTwo, '100%') == -1 && record.bzzShouldCheckNumTwo > 0 ? '#ff4d4f' : '' }">{{
+                record.bzzShouldCheckNumTwo > 0 ? record.bzzCheckRatioTwo : '-'
+              }}</span>
+            </template>
           </template>
           <template #summary>
             <a-table-summary fixed>
@@ -327,6 +342,139 @@
                 <a-table-summary-cell :col-span="21">
                   <a-typography-text type="danger">
                     <div>{{ remartTwo }}</div>
+                  </a-typography-text>
+                </a-table-summary-cell>
+              </a-table-summary-row>
+            </a-table-summary>
+          </template>
+        </a-table>
+      </div>
+      <div class="chart">
+        <div class="hd-table">
+          <div class="tit">三级高危作业</div>
+          <div class="right">
+            所属单位：
+            <a-select style="width: 220px" v-model:value="orgCode4" @change="handleChange4" placeholder="请选择" allowClear>
+              <a-select-option v-for="item in orgList" :key="item.orgCode">{{ item.departName }}</a-select-option>
+            </a-select>
+          </div>
+        </div>
+        <a-table :loading="loading" :columns="columns22" :data-source="levelData3" :pagination="false" bordered>
+          <template #bodyCell="{ column, record, index }">
+            <template v-if="column.key === 'index' && record.departName != '合计'">
+              {{ index + 1 }}
+            </template>
+
+            <template v-if="column.key === 'shouldCheckNumThree'">
+              <span>{{ record.shouldCheckNumThree }}</span>
+            </template>
+            <template v-if="column.key === 'checkNumThree'">
+              <span :style="{ color: comparePercent(record.checkRatioThree, '60%') == -1 && record.shouldCheckNumThree > 0 ? '#ff4d4f' : '' }">{{
+                record.checkNumThree
+              }}</span>
+            </template>
+            <template v-if="column.key === 'checkRatioThree'">
+              <span :style="{ color: comparePercent(record.checkRatioThree, '60%') == -1 && record.shouldCheckNumThree > 0 ? '#ff4d4f' : '' }">{{
+                record.shouldCheckNumThree > 0 ? record.checkRatioThree : '-'
+              }}</span>
+            </template>
+
+            <template v-if="column.key === 'fbzShouldCheckNumThree'">
+              <span :style="{ color: parseFloat(record.fbzCheckRatioThree) < 40 && record.fbzShouldCheckNumThree > 0 ? '#ff4d4f' : '' }">{{
+                record.fbzShouldCheckNumThree
+              }}</span>
+            </template>
+            <template v-if="column.key === 'fbzCheckNumThree'">
+              <span :style="{ color: parseFloat(record.fbzCheckRatioThree) < 40 && record.fbzShouldCheckNumThree > 0 ? '#ff4d4f' : '' }">{{
+                record.fbzCheckNumThree
+              }}</span>
+            </template>
+            <template v-if="column.key === 'fbzCheckRatioThree'">
+              <span :style="{ color: parseFloat(record.fbzCheckRatioThree) < 40 && record.fbzShouldCheckNumThree > 0 ? '#ff4d4f' : '' }">{{
+                record.fbzShouldCheckNumThree > 0 ? record.fbzCheckRatioThree : '-'
+              }}</span>
+            </template>
+            <template v-if="column.key === 'aqkShouldCheckNumThree'">
+              <span
+                :style="{ color: comparePercent(record.aqkCheckRatioThree, '60%') == -1 && record.aqkShouldCheckNumThree > 0 ? '#ff4d4f' : '' }"
+                >{{ record.aqkShouldCheckNumThree }}</span
+              >
+            </template>
+            <template v-if="column.key === 'aqkCheckNumThree'">
+              <span
+                :style="{ color: comparePercent(record.aqkCheckRatioThree, '60%') == -1 && record.aqkShouldCheckNumThree > 0 ? '#ff4d4f' : '' }"
+                >{{ record.aqkCheckNumThree }}</span
+              >
+            </template>
+            <template v-if="column.key === 'aqkCheckRatioThree'">
+              <span
+                :style="{ color: comparePercent(record.aqkCheckRatioThree, '60%') == -1 && record.aqkShouldCheckNumThree > 0 ? '#ff4d4f' : '' }"
+                >{{ record.aqkShouldCheckNumThree > 0 ? record.aqkCheckRatioThree : '-' }}</span
+              >
+            </template>
+            <template v-if="column.key === 'aqkzShouldCheckNumThree'">
+              <span
+                :style="{ color: comparePercent(record.aqkzCheckRatioThree, '60%') == -1 && record.aqkzShouldCheckNumThree > 0 ? '#ff4d4f' : '' }"
+                >{{ record.aqkzShouldCheckNumThree }}</span
+              >
+            </template>
+            <template v-if="column.key === 'aqkzCheckNumThree'">
+              <span
+                :style="{ color: comparePercent(record.aqkzCheckRatioThree, '60%') == -1 && record.aqkzShouldCheckNumThree > 0 ? '#ff4d4f' : '' }"
+                >{{ record.aqkCheckNumThree }}</span
+              >
+            </template>
+            <template v-if="column.key === 'aqkzCheckRatioThree'">
+              <span
+                :style="{ color: comparePercent(record.aqkzCheckRatioThree, '60%') == -1 && record.aqkzShouldCheckNumThree > 0 ? '#ff4d4f' : '' }"
+                >{{ record.aqkzShouldCheckNumThree > 0 ? record.aqkzCheckRatioThree : '-' }}</span
+              >
+            </template>
+
+            <template v-if="column.key === 'cjZrShouldCheckNumThree'">
+              <span
+                :style="{ color: comparePercent(record.cjZrCheckRatioThree, '60%') == -1 && record.cjZrShouldCheckNumThree > 0 ? '#ff4d4f' : '' }"
+                >{{ record.cjZrShouldCheckNumThree }}</span
+              >
+            </template>
+            <template v-if="column.key === 'cjZrCheckNumThree'">
+              <span
+                :style="{ color: comparePercent(record.cjZrCheckRatioThree, '60%') == -1 && record.cjZrShouldCheckNumThree > 0 ? '#ff4d4f' : '' }"
+                >{{ record.cjZrCheckNumThree }}</span
+              >
+            </template>
+            <template v-if="column.key === 'cjZrCheckRatioThree'">
+              <span
+                :style="{ color: comparePercent(record.cjZrCheckRatioThree, '60%') == -1 && record.cjZrShouldCheckNumThree > 0 ? '#ff4d4f' : '' }"
+                >{{ record.cjZrShouldCheckNumThree > 0 ? record.cjZrCheckRatioThree : '-' }}</span
+              >
+            </template>
+            <template v-if="column.key === 'bzzShouldCheckNumThree'">
+              <span
+                :style="{ color: comparePercent(record.bzzCheckRatioThree, '100%') == -1 && record.bzzShouldCheckNumThree > 0 ? '#ff4d4f' : '' }"
+                >{{ record.bzzShouldCheckNumThree }}</span
+              >
+            </template>
+            <template v-if="column.key === 'bzzCheckNumThree'">
+              <span
+                :style="{ color: comparePercent(record.bzzCheckRatioThree, '100%') == -1 && record.bzzShouldCheckNumThree > 0 ? '#ff4d4f' : '' }"
+                >{{ record.bzzCheckNumThree }}</span
+              >
+            </template>
+            <template v-if="column.key === 'bzzCheckRatioThree'">
+              <span
+                :style="{ color: comparePercent(record.bzzCheckRatioThree, '100%') == -1 && record.bzzShouldCheckNumThree > 0 ? '#ff4d4f' : '' }"
+                >{{ record.bzzShouldCheckNumThree > 0 ? record.bzzCheckRatioThree : '-' }}</span
+              >
+            </template>
+          </template>
+          <template #summary>
+            <a-table-summary fixed>
+              <a-table-summary-row :row-span="2" fixed>
+                <a-table-summary-cell :index="0">备注</a-table-summary-cell>
+                <a-table-summary-cell :col-span="21">
+                  <a-typography-text type="danger">
+                    <div>{{ remartThree }}</div>
                   </a-typography-text>
                 </a-table-summary-cell>
               </a-table-summary-row>
@@ -358,6 +506,7 @@
                 <a-typography-text type="danger">
                   <div>{{ desc1 }}</div>
                   <div>{{ desc2 }}</div>
+                  <div>{{ desc3 }}</div>
                 </a-typography-text>
               </a-table-summary-cell>
             </a-table-summary-row>
@@ -394,6 +543,7 @@
     columns,
     columns2,
     columns21,
+    columns22,
     columns3,
     onView,
     onExportWork,
@@ -487,12 +637,14 @@
     getData();
     getData2();
     getData3();
+    getData4();
     getDepart3ListWithSecurity().then((res) => {
       orgList.value = res;
     });
   };
   const orgCode1 = ref(undefined);
   const orgCode2 = ref(undefined);
+  const orgCode4 = ref(undefined);
   const orgCode3 = ref(undefined);
   // 所属单位 change事件
   const handleChange1 = () => {
@@ -503,6 +655,9 @@
   };
   const handleChange3 = () => {
     getData3();
+  };
+  const handleChange4 = () => {
+    getData4();
   };
 
   // 图表1按钮
@@ -855,12 +1010,15 @@
   const loading = ref(false);
   const levelData1 = ref([]);
   const levelData2 = ref([]);
+  const levelData3 = ref([]);
   const listDesc = ref<any[]>([]);
   const desc1 = ref('');
   const desc2 = ref('');
+  const desc3 = ref('');
 
   const remark = ref('');
   const remartTwo = ref('');
+  const remartThree = ref('');
   // 一级高危
   async function getData() {
     loading.value = true;
@@ -887,6 +1045,20 @@
     remartTwo.value = res.remarkTwo;
     levelData2.value = res.list;
   }
+  // 三级高危
+  async function getData4() {
+    loading.value = true;
+    let res = await getDangerousData({
+      startDate: queryParams.value.startTime,
+      endDate: queryParams.value.endTime,
+      orgCode: orgCode4.value,
+    }).finally(() => {
+      loading.value = false;
+    });
+    remartThree.value = res.remarkThree;
+    levelData3.value = res.list;
+    console.log(levelData3.value,'22222');
+  }
   const loading9 = ref(false);
   // 整改情况
   async function getData3() {
@@ -901,6 +1073,7 @@
     listDesc.value = res.listDesc;
     desc1.value = res.desc1;
     desc2.value = res.desc2;
+    desc3.value = res.desc3;
   }
   /**
    * 比较两个百分数的大小
@@ -1125,5 +1298,8 @@
   }
   :deep(.fbzShouldCheckNum) {
     background-color: rgba(186, 209, 96, 0.2);
+  }
+  :deep(.bzzShouldCheckNum) {
+    background-color: rgba(186, 232, 204, 0.2);
   }
 </style>

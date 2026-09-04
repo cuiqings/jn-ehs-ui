@@ -245,14 +245,15 @@ export const useDrawer = (emit, infoForm, infoRef, examInfoRef) => {
   const expandedKeys = ref([]);
   // 以下培训项目类型 会审必选
   // 1年度安全教育再培训
-  // 2新员工岗前三级培训
+  // 2新员工岗前三级培训（已移除，允许手动开关）
   // 6调岗和重新上岗安全培训
   // 7“四新”安全培训
   // 9专项培训-有限空间培训
   // 14专项培训-双控机制培训
   // 15专项培训-特种作业人员培训
   // 13专项培训-其它专项培训
-  const approvalType = ref(['1', '2', '6', '7', '9', '14', '15', '13']);
+  // 以下培训项目类型 会审必选（新员工岗前三级培训code='2'单独处理，允许手动开关）
+  const approvalType = ref(['1', '6', '7', '9', '14', '15', '13']);
   // 选择考试对象
   const [registerUserModal, { openModal: openUserModal }] = useModal();
   // 选择试卷
@@ -977,6 +978,7 @@ export const useDrawer = (emit, infoForm, infoRef, examInfoRef) => {
         info.value.review = '1';
         reviewDisabled.value = true;
       } else {
+        // 新员工岗前三级培训(code='2')：不强制开启，允许手动开关
         reviewDisabled.value = false;
       }
     }

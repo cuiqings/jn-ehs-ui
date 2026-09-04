@@ -369,6 +369,228 @@ export const useContent = () => {
         return { style: { background: 'rgba(255, 221, 126, 0.2)' } };
       },
     },
+    {
+      title: '班组长检查次数',
+      dataIndex: 'bzzCheckNum',
+      key: 'bzzCheckNum',
+      className: 'bzzShouldCheckNum',
+      customCell: () => {
+        return { style: { background: 'rgba(186, 232, 204,0.2)' } };
+      },
+    },
+    {
+      title: '班组长问题数量',
+      dataIndex: 'bzzProblemNum',
+      key: 'bzzProblemNum',
+      className: 'bzzShouldCheckNum',
+      customCell: () => {
+        return { style: { background: 'rgba(186, 232, 204,0.2)' } };
+      },
+    },
+    {
+      title: '班组长检查比例(100%)',
+      dataIndex: 'bzzCheckRatio',
+      key: 'bzzCheckRatio',
+      className: 'bzzShouldCheckNum',
+      customCell: () => {
+        return { style: { background: 'rgba(186, 232, 204,0.2)' } };
+      },
+    },
+  ];
+  const columns22: any[] = [
+    {
+      title: '序号',
+      dataIndex: 'index',
+      key: 'index',
+      width: 50,
+    },
+    {
+      title: '单位',
+      dataIndex: 'departName',
+      width: 150,
+    },
+    {
+      title: '申请数量',
+      dataIndex: 'applyNumThree',
+      key: 'applyNumThree',
+    },
+    {
+      title: '未完结数量',
+      dataIndex: 'unfinishedNumThree',
+      key: 'unfinishedNumThree',
+    },
+    {
+      title: '完结数量',
+      dataIndex: 'finishedNumThree',
+      key: 'finishedNumThree',
+    },
+    {
+      title: '作业次数',
+      dataIndex: 'shouldCheckNumThree',
+      key: 'shouldCheckNumThree',
+    },
+    {
+      title: '安全部检查次数',
+      dataIndex: 'checkNumThree',
+      key: 'checkNumThree',
+      className: 'shouldCheckNum',
+      customCell: () => {
+        return { style: { background: 'rgba(255, 199, 199, 0.2)' } };
+      },
+    },
+    {
+      title: '安全部问题数量',
+      dataIndex: 'problemNumThree',
+      key: 'problemNumThree',
+      className: 'shouldCheckNum',
+      customCell: () => {
+        return { style: { background: 'rgba(255, 199, 199, 0.2)' } };
+      },
+    },
+    {
+      title: '安全部检查比例(60%)',
+      dataIndex: 'checkRatioThree',
+      key: 'checkRatioThree',
+      className: 'shouldCheckNum',
+      customCell: () => {
+        return { style: { background: 'rgba(255, 199, 199, 0.2)' } };
+      },
+    },
+    {
+      title: '副部长检查次数',
+      dataIndex: 'fbzCheckNumThree',
+      key: 'fbzCheckNumThree',
+      className: 'fbzShouldCheckNum',
+      customCell: () => {
+        return { style: { background: 'rgba(186, 209, 96, 0.2)' } };
+      },
+    },
+    {
+      title: '副部长问题数量',
+      dataIndex: 'fbzProblemNumThree',
+      key: 'fbzProblemNumThree',
+      className: 'fbzShouldCheckNum',
+      customCell: () => {
+        return { style: { background: 'rgba(186, 209, 96, 0.2)' } };
+      },
+    },
+    {
+      title: '副部长检查比例(40%)',
+      dataIndex: 'fbzCheckRatioThree',
+      key: 'fbzCheckRatioThree',
+      className: 'fbzShouldCheckNum',
+      customCell: () => {
+        return { style: { background: 'rgba(186, 209, 96, 0.2)' } };
+      },
+    },
+    {
+      title: '安全科长检查次数',
+      dataIndex: 'aqkzCheckNumThree',
+      key: 'aqkzCheckNumThree',
+      className: 'aqkzShouldCheckNum',
+      customCell: () => {
+        return { style: { background: 'rgba(83, 172, 249, 0.2)' } };
+      },
+    },
+    {
+      title: '安全科长问题数量',
+      dataIndex: 'aqkzProblemNumThree',
+      key: 'aqkzProblemNumThree',
+      className: 'aqkzShouldCheckNum',
+      customCell: () => {
+        return { style: { background: 'rgba(83, 172, 249, 0.2)' } };
+      },
+    },
+    {
+      title: '安全科长检查比例(60%)',
+      dataIndex: 'aqkzCheckRatioThree',
+      key: 'aqkzCheckRatioThree',
+      className: 'aqkzShouldCheckNum',
+      customCell: () => {
+        return { style: { background: 'rgba(83, 172, 249, 0.2)' } };
+      },
+    },
+    {
+      title: '安全科检查次数',
+      dataIndex: 'aqkCheckNumThree',
+      key: 'aqkCheckNumThree',
+      className: 'aqkShouldCheckNum',
+      customCell: () => {
+        return { style: { background: 'rgba(167,253,218, 0.2)' } };
+      },
+    },
+    {
+      title: '安全科问题数量',
+      dataIndex: 'aqkProblemNumThree',
+      key: 'aqkProblemNumThree',
+      className: 'aqkShouldCheckNum',
+      customCell: () => {
+        return { style: { background: 'rgba(167,253,218, 0.2)' } };
+      },
+    },
+    {
+      title: '安全科检查比例(100%)',
+      dataIndex: 'aqkCheckRatioThree',
+      key: 'aqkCheckRatioThree',
+      className: 'aqkShouldCheckNum',
+      customCell: () => {
+        return { style: { background: 'rgba(167,253,218, 0.2)' } };
+      },
+    },
+    {
+      title: '车间主任检查次数',
+      dataIndex: 'cjZrCheckNumThree',
+      key: 'cjZrCheckNumThree',
+      className: 'cjZrShouldCheckNum',
+      customCell: () => {
+        return { style: { background: 'rgba(255, 221, 126, 0.2)' } };
+      },
+    },
+    {
+      title: '车间主任问题数量',
+      dataIndex: 'cjZrProblemNumThree',
+      key: 'cjZrProblemNumThree',
+      className: 'cjZrShouldCheckNum',
+      customCell: () => {
+        return { style: { background: 'rgba(255, 221, 126, 0.2)' } };
+      },
+    },
+    {
+      title: '车间主任检查比例(100%)',
+      dataIndex: 'cjZrCheckRatioThree',
+      key: 'cjZrCheckRatioThree',
+      className: 'cjZrShouldCheckNum',
+      customCell: () => {
+        return { style: { background: 'rgba(255, 221, 126, 0.2)' } };
+      },
+    },
+    {
+      title: '班组长检查次数',
+      dataIndex: 'bzzCheckNumThree',
+      key: 'bzzCheckNumThree',
+      className: 'bzzShouldCheckNum',
+      customCell: () => {
+        return { style: { background: 'rgba(186, 232, 204,0.2)' } };
+      },
+    },
+    {
+      title: '班组长问题数量',
+      dataIndex: 'bzzProblemNumThree',
+      key: 'bzzProblemNumThree',
+      className: 'bzzShouldCheckNum',
+      customCell: () => {
+        return { style: { background: 'rgba(186, 232, 204,0.2)' } };
+      },
+    },
+    {
+      title: '班组长检查比例(100%)',
+      dataIndex: 'bzzCheckRatioThree',
+      key: 'bzzCheckRatioThree',
+      className: 'bzzShouldCheckNum',
+      customCell: () => {
+        return { style: { background: 'rgba(186, 232, 204,0.2)' } };
+      },
+    },
   ];
   const columns2Un: any[] = [
     {
@@ -715,6 +937,33 @@ export const useContent = () => {
         return { style: { background: 'rgba(255, 221, 126, 0.2)' } };
       },
     },
+    {
+      title: '班组长检查次数',
+      dataIndex: 'bzzCheckNumTwo',
+      key: 'bzzCheckNumTwo',
+      className: 'bzzShouldCheckNum',
+      customCell: () => {
+        return { style: { background: 'rgba(186, 232, 204,0.2)' } };
+      },
+    },
+    {
+      title: '班组长问题数量',
+      dataIndex: 'bzzProblemNumTwo',
+      key: 'bzzProblemNumTwo',
+      className: 'bzzShouldCheckNum',
+      customCell: () => {
+        return { style: { background: 'rgba(186, 232, 204,0.2)' } };
+      },
+    },
+    {
+      title: '班组长检查比例(100%)',
+      dataIndex: 'bzzCheckRatioTwo',
+      key: 'bzzCheckRatioTwo',
+      className: 'bzzShouldCheckNum',
+      customCell: () => {
+        return { style: { background: 'rgba(186, 232, 204,0.2)' } };
+      },
+    },
   ];
 
   const columns3: any[] = [
@@ -840,6 +1089,7 @@ export const useContent = () => {
     columns2,
     columns2Un,
     columns21,
+    columns22,
     columns3,
     columns3Un,
     onView,
