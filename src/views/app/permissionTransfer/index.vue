@@ -257,9 +257,7 @@
             roleCode: selectedRoleCodes,
             endTime: form.endDate,
             remark: form.remark,
-            annex: form.annexStr
-              ? form.annexStr.split(',').map((url) => ({ url }))
-              : [],
+            annex: form.annexStr || '',
           });
           showSuccessToast('转交成功');
           resetForm();
