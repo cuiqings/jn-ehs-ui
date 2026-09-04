@@ -119,7 +119,7 @@ export const loadCategoryData = (params) => {
  * 文件上传
  */
 export const uploadFile = (params, success, fail = () => {}) => {
-  return defHttp.uploadFile({ url: Api.uploadUrl }, params, { success, fail });
+  return defHttp.uploadFile({ url: Api.uploadUrl, baseURL: '' }, params, { success, fail });
 };
 /**
  * 下载文件

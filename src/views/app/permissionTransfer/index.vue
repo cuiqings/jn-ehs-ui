@@ -42,7 +42,7 @@
           </div>
 
           <!-- 转交结束日期 -->
-          <div class="mb-20 bg-white rounded-lg p-4">
+          <div class="bg-white rounded-lg p-4 mb-4">
             <div class="text-sm font-bold mb-2 flex"> <span class="text-red-500 mr-1">*</span>转交结束日期 </div>
             <van-field
               v-model="form.endDate"
@@ -55,6 +55,27 @@
               class="border rounded-md p-2"
             />
             <van-calendar v-model:show="showCalendar" :min-date="minDate" @confirm="onConfirmDate" color="#1989fa" />
+          </div>
+
+          <!-- 转交原因 -->
+          <div class="bg-white rounded-lg p-4 mb-4">
+            <div class="text-sm font-bold mb-2 flex"> <span class="text-red-500 mr-1">*</span>转交原因 </div>
+            <van-field
+              v-model="form.remark"
+              type="textarea"
+              rows="3"
+              autosize
+              placeholder="请输入转交原因"
+              class="border rounded-md p-2"
+              :maxlength="200"
+              show-word-limit
+            />
+          </div>
+
+          <!-- 证明材料 -->
+          <div class="mb-20 bg-white rounded-lg p-4">
+            <div class="text-sm font-bold mb-2">证明材料</div>
+            <AppUpload v-model:fileList="form.annexStr" />
           </div>
 
           <!-- 底部按钮 -->
@@ -105,6 +126,7 @@
   import { showConfirmDialog, showToast, showSuccessToast } from 'vant';
   import { useUserStore } from '/@/store/modules/user';
   import UserPicker from './components/UserPicker.vue';
+  import AppUpload from '/@/views/app/components/AppUpload.vue';
   import { getTransferList, addTransfer, revokeTransfer, getUserRoleList } from './api';
   import dayjs from 'dayjs';
 
@@ -124,6 +146,8 @@
     recipientObj: null as any,
     selectedRoles: [] as string[],
     endDate: '',
+    remark: '',
+    annexStr: '',
   });
 
   // 接收人已有的角色（用于置灰）
@@ -143,6 +167,8 @@
     form.recipientObj = null;
     form.selectedRoles = [];
     form.endDate = '';
+    form.remark = '';
+    form.annexStr = '';
     recipientExistingRoles.value = [];
   };
 
@@ -206,6 +232,10 @@
       showToast('请选择转交结束日期');
       return;
     }
+    if (!form.remark) {
+      showToast('请输入转交原因');
+      return;
+    }
     // 获取选中的角色名称用于提示
     const selectedRoleNames = myRoles.value
       .filter((r: any) => form.selectedRoles.includes(r.roleCode))
@@ -224,8 +254,12 @@
           console.log('form.selectedRoles', form.selectedRoles);
           await addTransfer({
             receiver: form.receiver,
-            roleCode: selectedRoleCodes, // 传递角色ID/Value
+            roleCode: selectedRoleCodes,
             endTime: form.endDate,
+            remark: form.remark,
+            annex: form.annexStr
+              ? form.annexStr.split(',').map((url) => ({ url }))
+              : [],
           });
           showSuccessToast('转交成功');
           resetForm();

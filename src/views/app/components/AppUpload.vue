@@ -1,10 +1,32 @@
 <template>
   <div>
     <div class="material-upload-div_block">
-      <div class="file-item" v-for="(item, index) in fileList1" @click="onPreview(item, index)">
-        <van-image v-if="isImg(item.uri)" width="60" height="60" radius="4" :src="item.url" />
-        <div class="video-icon" v-else>
-          <van-icon size="32" color="#ffffff" name="play" />
+      <div class="file-item" v-for="(item, index) in fileList1" :key="index" @click="onPreview(item, index)">
+        <!-- 图片 -->
+        <van-image v-if="isImg(item.uri)" width="60" height="60" radius="4" :src="item.url" fit="cover" />
+        <!-- 视频 -->
+        <div class="type-icon video-icon" v-else-if="isVideo(item.uri)">
+          <van-icon size="28" color="#ffffff" name="play" />
+        </div>
+        <!-- Word -->
+        <div class="type-icon word-icon" v-else-if="isWord(item.uri)">
+          <span class="ext-label">W</span>
+        </div>
+        <!-- Excel -->
+        <div class="type-icon excel-icon" v-else-if="isExcel(item.uri)">
+          <span class="ext-label">X</span>
+        </div>
+        <!-- PDF -->
+        <div class="type-icon pdf-icon" v-else-if="isPdf(item.uri)">
+          <span class="ext-label">P</span>
+        </div>
+        <!-- 其他 -->
+        <div class="type-icon other-icon" v-else>
+          <van-icon size="28" color="#ffffff" name="description" />
+        </div>
+        <!-- 上传中蒙层 -->
+        <div v-if="item.status === 'uploading'" class="uploading-mask">
+          <van-loading size="18" color="#fff" />
         </div>
         <van-icon v-if="!disabled" class="material-upload-div_del" @click.stop="onDel(index)" name="cross" />
       </div>
@@ -47,6 +69,7 @@
   import { getFileAccessHttpUrl } from '/@/utils/common/compUtils';
   import { BasicModal, useModal } from '/@/components/Modal';
   import { showImagePreview } from 'vant';
+
   const emit = defineEmits(['update:fileList', 'change']);
   const props = defineProps({
     fileList: { type: String, default: '' },
@@ -55,16 +78,23 @@
     maxSize: { type: Number, default: 300 }, // 300M
     accept: {
       type: String,
-      default: 'docx,doc,xlsx,xls,pdf,png.jpeg,jpg',
+      default: 'docx,doc,xlsx,xls,pdf,png,jpeg,jpg,mp4',
     },
     disabled: { type: Boolean, default: false },
   });
+
   const [registerModal, { openModal }] = useModal();
   const previewUrl = ref('');
   const fileList1 = ref<any[]>([]);
   const loading = ref(false);
-  const reg = /\.(jpg|jpeg|png|gif|bmp|webp|svg|ico)$/i;
-  const isImg = (str) => reg.test(str);
+
+  // 文件类型判断
+  const isImg   = (str?: string) => /\.(jpg|jpeg|png|gif|bmp|webp|svg|ico)$/i.test(str || '');
+  const isVideo = (str?: string) => /\.(mp4|mov|avi|wmv|flv|mkv)$/i.test(str || '');
+  const isWord  = (str?: string) => /\.(doc|docx)$/i.test(str || '');
+  const isExcel = (str?: string) => /\.(xls|xlsx)$/i.test(str || '');
+  const isPdf   = (str?: string) => /\.pdf$/i.test(str || '');
+
   const trimFileName = (fileName: string) => {
     const index = fileName.lastIndexOf('_');
     const pointIndex = fileName.lastIndexOf('.');
@@ -73,6 +103,7 @@
     }
     return fileName;
   };
+
   watch(
     () => props.fileList,
     (v: any) => {
@@ -89,100 +120,91 @@
         fileList1.value = [];
       }
     },
-    {
-      immediate: true,
-    }
+    { immediate: true }
   );
+
   // 文件上传完毕后会触发
   const afterRead = async (file) => {
     loading.value = true;
-    if (file instanceof Array && file.length) {
-      file.forEach(async (item) => {
-        let params = {};
-        params = {
-          file: item.file,
-          data: { biz: 'app' },
-        };
-        uploadFile(params, (res) => {
-          if (res.success) {
-            item.status = 'done';
-            item.message = '';
-            item.objectUrl = '';
-            item.content = '';
-            item.url = getFileAccessHttpUrl(res.message);
-            item.uri = res.message;
-            const val = fileList1.value.filter((item) => item.uri).map((item) => item.uri);
-            emit('update:fileList', val.join(','));
-          } else {
-            showToast(res.message);
-            item.status = 'failed';
-            item.message = '上传失败';
-          }
-          loading.value = false;
-        }).finally(() => {
-          loading.value = false;
-        });
-      });
-    } else {
-      file.status = 'uploading';
-      file.message = '上传中...';
-      let params = {};
-      params = {
-        file: file.file,
-        data: { biz: 'app' },
-      };
-      uploadFile(params, (res) => {
+    const doUpload = (item) => {
+      item.status = 'uploading';
+      item.message = '上传中...';
+      uploadFile({ file: item.file, data: { biz: 'app' } }, (res) => {
         if (res.success) {
-          file.status = 'done';
-          file.message = '';
-          file.objectUrl = '';
-          file.content = '';
-          file.url = getFileAccessHttpUrl(res.message);
-          file.uri = res.message;
-          file.fileName = trimFileName(res.message);
-          const val = fileList1.value.filter((item) => item.uri).map((item) => item.uri);
+          item.status = 'done';
+          item.message = '';
+          item.objectUrl = '';
+          item.content = '';
+          item.url = getFileAccessHttpUrl(res.message);
+          item.uri = res.message;
+          item.fileName = trimFileName(res.message);
+          const val = fileList1.value.filter((f) => f.uri).map((f) => f.uri);
           emit('update:fileList', val.join(','));
         } else {
           showToast(res.message);
-          file.status = 'failed';
-          file.message = '上传失败';
+          item.status = 'failed';
+          item.message = '上传失败';
         }
         loading.value = false;
       }).finally(() => {
         loading.value = false;
       });
+    };
+
+    if (Array.isArray(file)) {
+      file.forEach(doUpload);
+    } else {
+      doUpload(file);
     }
   };
+
   const onOversize = () => {
     showToast('文件大小不能超过 300M');
   };
+
   const beforeRead = (file) => {
-    const type: string[] = [];
-    if (props.accept.includes('docx')) type.push('application/vnd.openxmlformats-officedocument.wordprocessingml.document');
-    if (props.accept.includes('doc')) type.push('application/msword');
-    if (props.accept.includes('xlsx')) type.push('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-    if (props.accept.includes('xls')) type.push('application/vnd.ms-excel');
-    if (props.accept.includes('pdf')) type.push('application/pdf');
-    if (props.accept.includes('png')) type.push('image/png');
-    if (props.accept.includes('jpeg')) type.push('image/jpeg');
-    if (props.accept.includes('jpg')) type.push('image/jpg');
-    if (props.accept.includes('mp4')) type.push('video/mp4');
-    if (type.includes(file.type)) {
+    const allowedTypes: string[] = [];
+    if (props.accept.includes('docx')) allowedTypes.push('application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+    if (props.accept.includes('doc'))  allowedTypes.push('application/msword');
+    if (props.accept.includes('xlsx')) allowedTypes.push('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    if (props.accept.includes('xls'))  allowedTypes.push('application/vnd.ms-excel');
+    if (props.accept.includes('pdf'))  allowedTypes.push('application/pdf');
+    if (props.accept.includes('png'))  allowedTypes.push('image/png');
+    if (props.accept.includes('jpeg')) allowedTypes.push('image/jpeg');
+    if (props.accept.includes('jpg'))  allowedTypes.push('image/jpg');
+    if (props.accept.includes('mp4'))  allowedTypes.push('video/mp4');
+    if (allowedTypes.includes(file.type)) {
       return file;
     } else {
-      showToast(`上传格式为${props.accept}！`);
+      showToast(`上传格式为 ${props.accept}`);
       return false;
     }
   };
+
   // 预览
   const onPreview = (file, idx) => {
-    if(isImg(file.uri)){
-      preview(idx);
+    // 未上传完成不做任何操作
+    if (!file.uri) return;
+
+    if (isImg(file.uri)) {
+      // 图片：找出当前文件在图片子列表中的位置
+      const imgList = fileList1.value.filter((f) => isImg(f.uri));
+      const imgIdx = imgList.findIndex((f) => f.uri === file.uri);
+      showImagePreview({
+        images: imgList.map((f) => getFileAccessHttpUrl(f.uri)),
+        startPosition: imgIdx >= 0 ? imgIdx : 0,
+      });
+    } else if (isVideo(file.uri)) {
+      // 视频：直接在新标签页打开
+      window.open(getFileAccessHttpUrl(file.uri), '_blank');
     } else {
+      // word / excel / pdf：走后端预览接口
       previewUrl.value = '';
       previewFile(file.uri).then((res) => {
         previewUrl.value = res;
         openModal(true);
+      }).catch(() => {
+        showToast('预览失败，请稍后重试');
       });
     }
   };
@@ -193,43 +215,14 @@
     const val = fileList1.value.filter((item) => item.uri).map((item) => item.uri);
     emit('update:fileList', val.join(','));
   };
-  // const previewUrl = ref('');
-  const getImages = () => {
-    let arr: string[] = [];
-    fileList1.value.forEach((item) => {
-      if (isImg(item.uri)) {
-        arr.push(getFileAccessHttpUrl(item.uri));
-      }
-    });
-    return arr;
-  };
-  async function preview (idx: any) {
-    console.log(idx);
-    
-    showImagePreview({
-      images: getImages(),
-      startPosition: idx,
-    });
-  };
 </script>
 
 <style lang="less" scoped>
-  .underline {
-    color: #02a7f0;
-    text-decoration: underline;
-    cursor: pointer;
-    width: 200px;
-  }
   .material-upload-div_block {
     display: flex;
     align-items: center;
     flex-wrap: wrap;
-    .break-word {
-      overflow: hidden;
-      white-space: nowrap;
-      text-overflow: ellipsis;
-      max-width: 90%;
-    }
+
     .file-item {
       width: 60px;
       height: 60px;
@@ -239,27 +232,59 @@
       justify-content: center;
       margin-right: 5px;
       margin-bottom: 5px;
+
       .material-upload-div_del {
         color: red;
         position: absolute;
         right: -5px;
         top: -5px;
+        font-size: 14px;
+        background: #fff;
+        border-radius: 50%;
       }
-      .video-icon {
+
+      // 上传中蒙层
+      .uploading-mask {
+        position: absolute;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.45);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 4px;
+      }
+
+      // 通用类型图标底座
+      .type-icon {
         width: 60px;
         height: 60px;
         display: flex;
         border-radius: 4px;
         align-items: center;
         justify-content: center;
-        background-color: #1988fa;
+        cursor: pointer;
+
+        .ext-label {
+          font-size: 22px;
+          font-weight: bold;
+          color: #fff;
+          line-height: 1;
+        }
       }
+
+      .video-icon { background-color: #1989fa; }
+      .word-icon  { background-color: #2b5fbe; }
+      .excel-icon { background-color: #217346; }
+      .pdf-icon   { background-color: #e03e2d; }
+      .other-icon { background-color: #909399; }
     }
   }
+
   /deep/.jeecg-modal-content > .scroll-container {
     padding: 0;
   }
 </style>
+
 <style lang="less">
   .sm-modal_preview {
     z-index: 999999 !important;

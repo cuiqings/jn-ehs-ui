@@ -325,7 +325,7 @@
               placeholder="请选择"
               :tree-data="applicationUnitOptions"
               multiple
-              showSearch
+              :showSearch="false"
               dropdownClassName="my-tree"
               @change="applicationUnitChange"
               tree-node-filter-prop="name"
@@ -344,7 +344,7 @@
               placeholder="请选择"
               :tree-data="applicantUnit"
               multiple
-              showSearch
+              :showSearch="false"
               dropdownClassName="my-tree"
               @change="applicationUnitChange"
               tree-node-filter-prop="name"
@@ -363,7 +363,7 @@
               placeholder="请选择"
               :tree-data="applicantUnit"
               multiple
-              showSearch
+              :showSearch="false"
               dropdownClassName="my-tree"
               @change="applicationUnitChange"
               tree-node-filter-prop="name"

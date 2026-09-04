@@ -26,8 +26,8 @@
       >
         <template #input>
           <van-radio-group v-model="dialogFormData.desc" direction="horizontal">
-            <van-radio :name="0" icon-size="16px">今日未作业</van-radio>
             <van-radio :name="1" icon-size="16px">今日已作业</van-radio>
+            <van-radio :name="0" icon-size="16px">今日未作业</van-radio>
           </van-radio-group>
         </template>
       </van-field>
@@ -52,7 +52,7 @@ import { FormInstance } from 'vant';
   }
 
   const dialogFormData = reactive<WorkAnalysisItems>({
-    desc: null,
+    desc: 1,
     reason: '',
   });
   const cancel = () => {
@@ -67,7 +67,7 @@ import { FormInstance } from 'vant';
         Object.assign(dialogFormData, {
           delayDate: '',
           reason: '',
-          desc: null,
+          desc: 1,
         });
         return true;
       })
