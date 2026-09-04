@@ -64,6 +64,9 @@
     if(data.color){
       option.color = data.color;
     }
+    if(data.dataZoom) {
+      option.dataZoom = data.dataZoom;
+    }
     console.log(option.color);
     
     setOptions(option);
