@@ -139,7 +139,9 @@
           </div>
         </div>
       </div>
-      <div class="chart gary" v-loading="loading2"> <LineBar ref="lineBarRef2" /></div>
+      <div class="chart gary" v-loading="loading2">
+        <LineBar ref="lineBarRef2" />
+      </div>
       <div class="chart" v-loading="loading3">
         <LineBar ref="lineBarRef3" />
       </div>
@@ -532,6 +534,7 @@
   import workDetail from '../../hazardousOperation/detail/detailDaver.vue';
   import { CloudDownloadOutlined, FolderViewOutlined } from '@ant-design/icons-vue';
   import { downloadFileAll, getDepart3ListWithSecurity } from '/@/api/common/api';
+  import { useUserStore } from '/@/store/modules/user';
   import { useContent } from './hooks/useContent';
   import LineBar from '../components/lineBar.vue';
   import dayjs from 'dayjs';
@@ -627,6 +630,11 @@
   }
 
   const orgList = ref<any[]>([]);
+  const userStore = useUserStore();
+  const userOrgCode = userStore.getUserInfo?.orgCode || '';
+  const userUsername = userStore.getUserInfo?.username || '';
+  // admin 账号或 orgCode 为空时不默认筛选，显示全部
+  const defaultOrgCode = (userUsername === 'admin' || !userOrgCode) ? undefined : userOrgCode;
   const initData = async () => {
     queryParams.value.startTime = getFieldsValue().time.split(',')[0];
     queryParams.value.endTime = getFieldsValue().time.split(',')[1];
@@ -645,7 +653,7 @@
   const orgCode1 = ref(undefined);
   const orgCode2 = ref(undefined);
   const orgCode4 = ref(undefined);
-  const orgCode3 = ref(undefined);
+  const orgCode3 = ref<string | undefined>(defaultOrgCode);
   // 所属单位 change事件
   const handleChange1 = () => {
     getData();
@@ -801,6 +809,8 @@
     lineBarRef2.value.initCharts({
       title: '各单位危险作业类型统计',
       barWidth: 10,
+      barGap: '20%',
+      barCategoryGap: '50%',
       xAxis: [
         {
           type: 'category',
@@ -832,22 +842,8 @@
         },
       ],
       grid: {
-        bottom: 80,
+        bottom: 90,
       },
-      dataZoom: [
-        {
-          type: 'slider',
-          show: true,
-          xAxisIndex: [0],
-          start: 0,
-          end: 46,
-          bottom: 40,
-        },
-        {
-          type: 'inside',
-          xAxisIndex: [0],
-        },
-      ],
       series: [
         {
           name: '高处作业',

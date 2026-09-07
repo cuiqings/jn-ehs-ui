@@ -3,7 +3,7 @@
     <div class="high-risk-panel">
       <div class="panel-card">
         <div class="card-header">
-          <div class="card-title">高危作业总量</div>
+          <div class="card-title">高危作业次数</div>
           <div class="card-icon">
             <Icon icon="ant-design:bar-chart-outlined" :size="30" color="#1890ff" />
           </div>

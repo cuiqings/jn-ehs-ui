@@ -26,7 +26,7 @@
               <tr>
                 <th class="col-rank">序号</th>
                 <th class="col-name">{{ highFilteredOrgName ? '车间' : '单位' }}</th>
-                <th class="col-num">作业数量</th>
+                <th class="col-num">作业次数</th>
                 <th class="col-num">人数</th>
                 <th class="col-rate">人均报备率</th>
               </tr>
@@ -82,7 +82,7 @@
               <tr>
                 <th class="col-rank">序号</th>
                 <th class="col-name">{{ nonHighFilteredOrgName ? '车间' : '单位' }}</th>
-                <th class="col-num">作业数量</th>
+                <th class="col-num">作业次数</th>
                 <th class="col-num">人数</th>
                 <th class="col-rate">人均报备率</th>
               </tr>
