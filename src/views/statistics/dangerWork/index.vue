@@ -495,10 +495,24 @@
             <a-button style="margin-left: 8px" type="primary" :loading="exportIng" @click="handleExport">导出</a-button>
           </div>
         </div>
-        <a-table :loading="loading9" :columns="columns3" :data-source="listDesc" :pagination="false" bordered>
+        <a-table
+          :loading="loading9"
+          :columns="columns3"
+          :data-source="listDesc"
+          :pagination="{
+            current: desc3PageNo,
+            pageSize: desc3PageSize,
+            total: desc3Total,
+            showSizeChanger: true,
+            showQuickJumper: true,
+            showTotal: () => `共 ${desc3Total} 条`,
+            onChange: onDesc3PageChange,
+            onShowSizeChange: onDesc3SizeChange,
+          }"
+          bordered>
           <template #bodyCell="{ column, index }">
             <template v-if="column.key === 'index'">
-              {{ index + 1 }}
+              {{ (desc3PageNo - 1) * desc3PageSize + index + 1 }}
             </template>
           </template>
           <template #summary>
@@ -514,6 +528,7 @@
             </a-table-summary-row>
           </template>
         </a-table>
+        <div style="height:12px;"></div>
       </div>
     </div>
     <workDetail ref="workDetailRef" @register="register" />
@@ -644,6 +659,7 @@
     await lineBarInit3();
     getData();
     getData2();
+    desc3PageNo.value = 1;
     getData3();
     getData4();
     getDepart3ListWithSecurity().then((res) => {
@@ -662,6 +678,17 @@
     getData2();
   };
   const handleChange3 = () => {
+    desc3PageNo.value = 1;
+    getData3();
+  };
+  const onDesc3PageChange = (page: number, pageSize: number) => {
+    desc3PageNo.value = page;
+    desc3PageSize.value = pageSize;
+    getData3();
+  };
+  const onDesc3SizeChange = (current: number, size: number) => {
+    desc3PageNo.value = 1;
+    desc3PageSize.value = size;
     getData3();
   };
   const handleChange4 = () => {
@@ -1080,20 +1107,28 @@
     console.log(levelData3.value,'22222');
   }
   const loading9 = ref(false);
+  const desc3PageNo = ref(1);
+  const desc3PageSize = ref(10);
+  const desc3Total = ref(0);
   // 整改情况
   async function getData3() {
     loading9.value = true;
-    let res = await getDangerousDesc({
-      startDate: queryParams.value.startTime,
-      endDate: queryParams.value.endTime,
-      orgCode: orgCode3.value,
-    }).finally(() => {
+    try {
+      let res = await getDangerousDesc({
+        startDate: queryParams.value.startTime,
+        endDate: queryParams.value.endTime,
+        orgCode: orgCode3.value,
+        pageNo: desc3PageNo.value,
+        pageSize: desc3PageSize.value,
+      });
+      listDesc.value = res.listDesc;
+      desc3Total.value = res.total || 0;
+      desc1.value = res.desc1;
+      desc2.value = res.desc2;
+      desc3.value = res.desc3;
+    } finally {
       loading9.value = false;
-    });
-    listDesc.value = res.listDesc;
-    desc1.value = res.desc1;
-    desc2.value = res.desc2;
-    desc3.value = res.desc3;
+    }
   }
   /**
    * 比较两个百分数的大小
