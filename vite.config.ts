@@ -63,6 +63,45 @@ export default ({ command, mode }: ConfigEnv): UserConfig => {
       outDir: OUTPUT_DIR,
       reportCompressedSize: false,
       chunkSizeWarningLimit: 2000,
+      rollupOptions: {
+        output: {
+          // 手动分包：把大型第三方库单独打成独立 chunk
+          // 好处：rollup 不再反复计算这些库的依赖合并，减少 bundle 阶段耗时
+          manualChunks: {
+            // Vue 核心
+            'chunk-vue': ['vue', 'vue-router', 'pinia', 'vue-i18n', '@vueuse/core', '@vueuse/shared'],
+            // Ant Design Vue（体积最大的 UI 库）
+            'chunk-antd': ['ant-design-vue', '@ant-design/icons-vue', '@ant-design/colors'],
+            // ECharts 图表库
+            'chunk-echarts': ['echarts', 'zrender'],
+            // AntV X6 流程图
+            'chunk-antv': ['@antv/x6'],
+            // vxe-table 表格
+            'chunk-vxe': ['vxe-table', 'xe-utils'],
+            // Vant 移动端组件库
+            'chunk-vant': ['vant'],
+            // lodash-es 工具库（模块数量极多，单独分包避免碎片化）
+            'chunk-lodash': ['lodash-es'],
+            // TinyMCE 富文本编辑器
+            'chunk-tinymce': ['tinymce'],
+            // xgplayer 视频播放器
+            'chunk-xgplayer': ['xgplayer', 'xgplayer-hls'],
+            // 其他较大的工具库
+            'chunk-utils': [
+              'axios',
+              'dayjs',
+              'crypto-js',
+              'jsencrypt',
+              'jszip',
+              'file-saver',
+              'sortablejs',
+              'vuedraggable',
+              'qrcode',
+              'html2canvas',
+            ],
+          },
+        },
+      },
     },
     define: {
       __INTLIFY_PROD_DEVTOOLS__: false,
