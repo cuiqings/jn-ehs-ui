@@ -3,10 +3,10 @@
     <van-tabs v-model:active="activeTab" sticky color="#1989fa">
       <!-- Tab 1: 新建转交 -->
       <van-tab title="新建转交">
-        <div class="p-4 bg-gray-50 min-h-screen">
+        <div class="tab-body">
           <!-- 选择接收人员 -->
-          <div class="mb-4 bg-white rounded-lg p-4">
-            <div class="text-sm font-bold mb-2 flex"> <span class="text-red-500 mr-1">*</span>选择接收人员 </div>
+          <div class="form-block">
+            <div class="block-label required">选择接收人员</div>
             <van-field
               v-model="form.recipientName"
               readonly
@@ -15,13 +15,13 @@
               placeholder="请选择接收人员"
               right-icon="arrow"
               @click="showUserPicker = true"
-              class="border rounded-md p-2"
+              class="field-border"
             />
           </div>
 
           <!-- 选择角色 -->
-          <div class="mb-4 bg-white rounded-lg p-4">
-            <div class="text-sm font-bold mb-2 flex"> <span class="text-red-500 mr-1">*</span>选择角色 </div>
+          <div class="form-block">
+            <div class="block-label required">选择角色</div>
             <van-checkbox-group v-model="form.selectedRoles">
               <van-cell-group :border="false">
                 <van-cell
@@ -30,20 +30,20 @@
                   clickable
                   :title="role.roleName"
                   @click="toggleRole(role)"
-                  class="mb-2 border rounded-md"
+                  class="role-cell"
                 >
                   <template #icon>
-                    <van-checkbox :name="role.roleCode" ref="checkboxes" :disabled="role.disabled" class="mr-2" />
+                    <van-checkbox :name="role.roleCode" ref="checkboxes" :disabled="role.disabled" style="margin-right: 8px" />
                   </template>
                 </van-cell>
               </van-cell-group>
             </van-checkbox-group>
-            <div v-if="myRoles.length === 0" class="text-gray-400 text-sm text-center py-2"> 当前无可用角色 </div>
+            <div v-if="myRoles.length === 0" class="empty-roles">当前无可用角色</div>
           </div>
 
           <!-- 转交结束日期 -->
-          <div class="bg-white rounded-lg p-4 mb-4">
-            <div class="text-sm font-bold mb-2 flex"> <span class="text-red-500 mr-1">*</span>转交结束日期 </div>
+          <div class="form-block">
+            <div class="block-label required">转交结束日期</div>
             <van-field
               v-model="form.endDate"
               readonly
@@ -52,35 +52,35 @@
               placeholder="年 / 月 / 日"
               right-icon="calendar-o"
               @click="showCalendar = true"
-              class="border rounded-md p-2"
+              class="field-border"
             />
             <van-calendar v-model:show="showCalendar" :min-date="minDate" @confirm="onConfirmDate" color="#1989fa" />
           </div>
 
           <!-- 转交原因 -->
-          <div class="bg-white rounded-lg p-4 mb-4">
-            <div class="text-sm font-bold mb-2 flex"> <span class="text-red-500 mr-1">*</span>转交原因 </div>
+          <div class="form-block">
+            <div class="block-label required">转交原因</div>
             <van-field
               v-model="form.remark"
               type="textarea"
               rows="3"
               autosize
               placeholder="请输入转交原因"
-              class="border rounded-md p-2"
+              class="field-border"
               :maxlength="200"
               show-word-limit
             />
           </div>
 
           <!-- 证明材料 -->
-          <div class="mb-20 bg-white rounded-lg p-4">
-            <div class="text-sm font-bold mb-2">证明材料</div>
+          <div class="form-block" style="margin-bottom: 80px">
+            <div class="block-label">证明材料</div>
             <AppUpload v-model:fileList="form.annexStr" />
           </div>
 
           <!-- 底部按钮 -->
-          <div class="fixed bottom-0 left-0 w-full bg-white p-4 flex justify-between shadow-lg z-10">
-            <van-button style="margin-right: 10px" block class="mr-2 bg-gray-100 border-0 text-gray-700" @click="resetForm">取消</van-button>
+          <div class="footer-btns">
+            <van-button style="margin-right: 10px" block plain @click="resetForm">取消</van-button>
             <van-button block type="primary" color="#1989fa" @click="onSubmit">确认转交</van-button>
           </div>
         </div>
@@ -88,27 +88,27 @@
 
       <!-- Tab 2: 转交历史 -->
       <van-tab title="转交历史">
-        <div class="p-4 bg-gray-50 min-h-screen pb-20">
+        <div class="tab-body">
           <van-list v-model:loading="loadingHistory" :finished="historyFinished" finished-text="没有更多了" @load="onLoadHistory">
-            <div v-for="item in historyList" :key="item.id" class="bg-white rounded-lg p-4 mb-4 relative">
-              <div class="flex justify-between items-start mb-2">
-                <div class="font-bold text-base">转交给 {{ item.receiverName }}</div>
+            <div v-for="item in historyList" :key="item.id" class="history-card">
+              <div class="history-card__header">
+                <div class="history-card__name">转交给 {{ item.receiverName }}</div>
                 <van-tag :type="getStatusType(item.status)" size="medium">{{ getStatusText(item.status) }}</van-tag>
               </div>
 
-              <div class="text-gray-500 text-sm mb-1"> 工号：{{ item.receiverWorkNo }} | {{ item.receiverOrgName }} </div>
+              <div class="history-card__info"> 工号：{{ item.receiverWorkNo }} | {{ item.receiverOrgName }} </div>
 
-              <div class="text-gray-500 text-sm mb-2"> 转交时间：{{ item.assignTime.slice(0, 10) }} 至 {{ item.endTime.split(' ')[0] }} </div>
+              <div class="history-card__info"> 转交时间：{{ item.assignTime.slice(0, 10) }} 至 {{ item.endTime.split(' ')[0] }} </div>
 
-              <div class="flex flex-wrap gap-2 mb-2">
-                <span v-for="role in item.roleName.split(',')" :key="role" class="bg-gray-100 text-gray-600 px-2 py-1 rounded text-xs">
+              <div class="history-card__roles">
+                <span v-for="role in item.roleName.split(',')" :key="role" class="role-tag">
                   {{ role }}
                 </span>
               </div>
 
               <!-- 撤销按钮 -->
-              <div v-if="item.status === '1'" class="mt-2">
-                <van-button plain type="danger" size="small" @click="onRevoke(item)"> 撤销转交 </van-button>
+              <div v-if="item.status === '1'" style="margin-top: 8px">
+                <van-button plain type="danger" size="small" @click="onRevoke(item)">撤销转交</van-button>
               </div>
             </div>
           </van-list>
@@ -122,7 +122,7 @@
 </template>
 
 <script setup lang="ts">
-  import { ref, reactive, computed, onMounted } from 'vue';
+  import { ref, reactive, onMounted } from 'vue';
   import { showConfirmDialog, showToast, showSuccessToast } from 'vant';
   import { useUserStore } from '/@/store/modules/user';
   import UserPicker from './components/UserPicker.vue';
@@ -139,7 +139,6 @@
   const minDate = new Date();
   const myRoles = ref<any[]>([]);
 
-  // 表单数据
   const form = reactive({
     receiver: '',
     recipientName: '',
@@ -150,17 +149,15 @@
     annexStr: '',
   });
 
-  // 接收人已有的角色（用于置灰）
   const recipientExistingRoles = ref<string[]>([]);
-  // 当前登录人的角色列表
+
   function getMyRoles() {
     getUserRoleList({ userId: userStore.getUserInfo?.id }).then((res) => {
-      console.log('myRoles', res);
       myRoles.value = res || [];
     });
   }
   getMyRoles();
-  // 重置表单
+
   const resetForm = () => {
     form.receiver = '';
     form.recipientName = '';
@@ -172,71 +169,42 @@
     recipientExistingRoles.value = [];
   };
 
-  // 选择人员回调
   const onUserSelected = async (user: any) => {
     form.receiver = user.id;
     form.recipientName = user.realname;
     form.recipientObj = user;
-    // 获取接收人已有的角色
     await getUserRoleList({ userId: user.id }).then((res) => {
-      console.log('recipientExistingRoles', res);
       recipientExistingRoles.value = res || [];
     });
-    // 如果选择的接收人员有和登录人一样的角色，该角色置灰，不可选
     if (recipientExistingRoles.value.length === 0) return;
-    let recipientExistingRoleCodes: string[] = [];
-    recipientExistingRoles.value.forEach((role: any) => {
-      recipientExistingRoleCodes.push(role.roleCode);
-    });
-
-    console.log('recipientExistingRoleCodes', recipientExistingRoleCodes);
+    const recipientExistingRoleCodes: string[] = recipientExistingRoles.value.map((role: any) => role.roleCode);
     myRoles.value = myRoles.value.map((role: any) => {
-      if (recipientExistingRoleCodes.includes(role.roleCode)) {
-        role.disabled = true;
-      } else {
-        role.disabled = false;
-      }
+      role.disabled = recipientExistingRoleCodes.includes(role.roleCode);
       return role;
     });
   };
 
-  // 点击角色行
   const toggleRole = (role: any) => {
     if (role.disabled) return;
-
-    const index = form.selectedRoles.indexOf(role.value);
+    const index = form.selectedRoles.indexOf(role.roleCode);
     if (index !== -1) {
       form.selectedRoles.splice(index, 1);
     } else {
-      form.selectedRoles.push(role.value);
+      form.selectedRoles.push(role.roleCode);
     }
   };
 
-  // 日期确认
   const onConfirmDate = (date: Date) => {
     form.endDate = dayjs(date).format('YYYY-MM-DD');
     showCalendar.value = false;
   };
 
-  // 提交转交
   const onSubmit = () => {
-    if (!form.receiver) {
-      showToast('请选择接收人员');
-      return;
-    }
-    if (form.selectedRoles.length === 0) {
-      showToast('请选择角色');
-      return;
-    }
-    if (!form.endDate) {
-      showToast('请选择转交结束日期');
-      return;
-    }
-    if (!form.remark) {
-      showToast('请输入转交原因');
-      return;
-    }
-    // 获取选中的角色名称用于提示
+    if (!form.receiver) { showToast('请选择接收人员'); return; }
+    if (form.selectedRoles.length === 0) { showToast('请选择角色'); return; }
+    if (!form.endDate) { showToast('请选择转交结束日期'); return; }
+    if (!form.remark) { showToast('请输入转交原因'); return; }
+
     const selectedRoleNames = myRoles.value
       .filter((r: any) => form.selectedRoles.includes(r.roleCode))
       .map((r: any) => r.roleName)
@@ -245,13 +213,13 @@
       .filter((r: any) => form.selectedRoles.includes(r.roleCode))
       .map((r: any) => r.roleCode)
       .join(',');
+
     showConfirmDialog({
       title: '确认转交',
       message: `确定将${form.recipientName}赋予${selectedRoleNames}角色？确认后，在结束日期前，该员工将具备相应权限`,
     })
       .then(async () => {
         try {
-          console.log('form.selectedRoles', form.selectedRoles);
           await addTransfer({
             receiver: form.receiver,
             roleCode: selectedRoleCodes,
@@ -261,18 +229,13 @@
           });
           showSuccessToast('转交成功');
           resetForm();
-          // 刷新历史列表
           onRefreshHistory();
-          // 切换到历史Tab
           activeTab.value = 1;
         } catch (error) {
-          // 错误处理由axios拦截器或API层处理，或者在这里显示
           console.error(error);
         }
       })
-      .catch(() => {
-        // 取消
-      });
+      .catch(() => {});
   };
 
   // --- Tab 2: 转交历史 ---
@@ -284,22 +247,14 @@
   const onLoadHistory = async () => {
     loadingHistory.value = true;
     try {
-      const res = await getTransferList({
-        pageNo: historyPage.value,
-        pageSize: 10,
-      });
-      // 假设API返回 { records: [], total: 0 }
+      const res = await getTransferList({ pageNo: historyPage.value, pageSize: 10 });
       const records = res?.records || [];
-
       if (historyPage.value === 1) {
         historyList.value = records;
       } else {
         historyList.value = [...historyList.value, ...records];
       }
-
-      if (records.length < 10) {
-        historyFinished.value = true;
-      }
+      if (records.length < 10) historyFinished.value = true;
       historyPage.value++;
     } catch (error) {
       historyFinished.value = true;
@@ -322,46 +277,134 @@
   };
 
   const getStatusType = (status: any) => {
-    if (status === '3') return 'default'; // 灰色
-    if (status === '2') return 'success'; // 绿色
-    return 'primary'; // 蓝色
+    if (status === '3') return 'default';
+    if (status === '2') return 'success';
+    return 'primary';
   };
 
-
-  // 撤销操作
   const onRevoke = (item: any) => {
-    showConfirmDialog({
-      title: '撤销确认',
-      message: '确定要撤销此权限转交吗？',
-    })
+    showConfirmDialog({ title: '撤销确认', message: '确定要撤销此权限转交吗？' })
       .then(async () => {
         try {
           await revokeTransfer({ id: item.id });
           showSuccessToast('撤销成功');
-          // 刷新列表
           onRefreshHistory();
         } catch (error) {
           console.error(error);
         }
       })
-      .catch(() => {
-        // 取消
-      });
+      .catch(() => {});
   };
 
-  // 监听Tab切换
-  onMounted(() => {
-    // 可以在这里做一些初始化
-  });
+  onMounted(() => {});
 </script>
 
 <style scoped lang="less">
-  .permission-transfer {
-    background-color: #f7f8fa;
-    min-height: 100vh;
+.permission-transfer {
+  background-color: #f7f8fa;
+  min-height: 100vh;
 
-    :deep(.van-field__label) {
-      display: none;
-    }
+  :deep(.van-field__label) {
+    display: none;
   }
+}
+
+.tab-body {
+  padding: 12px;
+  background-color: #f7f8fa;
+  min-height: 100vh;
+  padding-bottom: 80px;
+}
+
+.form-block {
+  background: #ffffff;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 12px;
+}
+
+.block-label {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 8px;
+
+  &.required::before {
+    content: '*';
+    color: #ee0a24;
+    margin-right: 4px;
+  }
+}
+
+.field-border {
+  border: 1px solid #ebedf0;
+  border-radius: 6px;
+}
+
+.role-cell {
+  margin-bottom: 8px;
+  border: 1px solid #ebedf0;
+  border-radius: 6px;
+}
+
+.empty-roles {
+  color: #969799;
+  font-size: 12px;
+  text-align: center;
+  padding: 8px 0;
+}
+
+.footer-btns {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: #ffffff;
+  padding: 12px 16px;
+  display: flex;
+  justify-content: space-between;
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.08);
+  z-index: 10;
+  box-sizing: border-box;
+}
+
+.history-card {
+  background: #ffffff;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 12px;
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 8px;
+  }
+
+  &__name {
+    font-weight: 600;
+    font-size: 16px;
+  }
+
+  &__info {
+    color: #969799;
+    font-size: 12px;
+    margin-bottom: 4px;
+  }
+
+  &__roles {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 8px;
+    margin-top: 6px;
+  }
+}
+
+.role-tag {
+  background: #f2f3f5;
+  color: #646566;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+}
 </style>
