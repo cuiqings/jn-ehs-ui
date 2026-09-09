@@ -660,11 +660,10 @@
     getData();
     getData2();
     desc3PageNo.value = 1;
+    const orgRes = await getDepart3ListWithSecurity();
+    orgList.value = orgRes;
     getData3();
     getData4();
-    getDepart3ListWithSecurity().then((res) => {
-      orgList.value = res;
-    });
   };
   const orgCode1 = ref(undefined);
   const orgCode2 = ref(undefined);

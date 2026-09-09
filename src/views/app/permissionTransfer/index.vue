@@ -23,20 +23,16 @@
           <div class="form-block">
             <div class="block-label required">选择角色</div>
             <van-checkbox-group v-model="form.selectedRoles">
-              <van-cell-group :border="false">
-                <van-cell
-                  v-for="(role, index) in myRoles"
-                  :key="role.roleCode"
-                  clickable
-                  :title="role.roleName"
-                  @click="toggleRole(role)"
-                  class="role-cell"
-                >
-                  <template #icon>
-                    <van-checkbox :name="role.roleCode" ref="checkboxes" :disabled="role.disabled" style="margin-right: 8px" />
-                  </template>
-                </van-cell>
-              </van-cell-group>
+              <van-checkbox
+                v-for="role in myRoles"
+                :key="role.roleCode"
+                :name="role.roleCode"
+                :disabled="role.disabled"
+                class="role-checkbox-row"
+                label-position="right"
+              >
+                {{ role.roleName }}
+              </van-checkbox>
             </van-checkbox-group>
             <div v-if="myRoles.length === 0" class="empty-roles">当前无可用角色</div>
           </div>
@@ -184,15 +180,7 @@
     });
   };
 
-  const toggleRole = (role: any) => {
-    if (role.disabled) return;
-    const index = form.selectedRoles.indexOf(role.roleCode);
-    if (index !== -1) {
-      form.selectedRoles.splice(index, 1);
-    } else {
-      form.selectedRoles.push(role.roleCode);
-    }
-  };
+  // toggleRole 已移除，van-checkbox-group 双向绑定直接处理选中逻辑
 
   const onConfirmDate = (date: Date) => {
     form.endDate = dayjs(date).format('YYYY-MM-DD');
@@ -340,10 +328,18 @@
   border-radius: 6px;
 }
 
-.role-cell {
+.role-checkbox-row {
+  padding: 12px 8px;
   margin-bottom: 8px;
   border: 1px solid #ebedf0;
   border-radius: 6px;
+  width: 100%;
+  box-sizing: border-box;
+
+  :deep(.van-checkbox__label) {
+    font-size: 14px;
+    color: #323233;
+  }
 }
 
 .empty-roles {
