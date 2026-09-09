@@ -549,7 +549,6 @@
   import workDetail from '../../hazardousOperation/detail/detailDaver.vue';
   import { CloudDownloadOutlined, FolderViewOutlined } from '@ant-design/icons-vue';
   import { downloadFileAll, getDepart3ListWithSecurity } from '/@/api/common/api';
-  import { useUserStore } from '/@/store/modules/user';
   import { useContent } from './hooks/useContent';
   import LineBar from '../components/lineBar.vue';
   import dayjs from 'dayjs';
@@ -645,11 +644,6 @@
   }
 
   const orgList = ref<any[]>([]);
-  const userStore = useUserStore();
-  const userOrgCode = userStore.getUserInfo?.orgCode || '';
-  const userUsername = userStore.getUserInfo?.username || '';
-  // admin 账号或 orgCode 为空时不默认筛选，显示全部
-  const defaultOrgCode = (userUsername === 'admin' || !userOrgCode) ? undefined : userOrgCode;
   const initData = async () => {
     queryParams.value.startTime = getFieldsValue().time.split(',')[0];
     queryParams.value.endTime = getFieldsValue().time.split(',')[1];
@@ -662,13 +656,14 @@
     desc3PageNo.value = 1;
     const orgRes = await getDepart3ListWithSecurity();
     orgList.value = orgRes;
+    orgCode3.value = orgRes.length === 1 ? orgRes[0].orgCode : undefined;
     getData3();
     getData4();
   };
   const orgCode1 = ref(undefined);
   const orgCode2 = ref(undefined);
   const orgCode4 = ref(undefined);
-  const orgCode3 = ref<string | undefined>(defaultOrgCode);
+  const orgCode3 = ref<string | undefined>(undefined);
   // 所属单位 change事件
   const handleChange1 = () => {
     getData();
