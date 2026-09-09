@@ -549,6 +549,7 @@
   import workDetail from '../../hazardousOperation/detail/detailDaver.vue';
   import { CloudDownloadOutlined, FolderViewOutlined } from '@ant-design/icons-vue';
   import { downloadFileAll, getDepart3ListWithSecurity } from '/@/api/common/api';
+  import { useUserStore } from '/@/store/modules/user';
   import { useContent } from './hooks/useContent';
   import LineBar from '../components/lineBar.vue';
   import dayjs from 'dayjs';
@@ -644,6 +645,8 @@
   }
 
   const orgList = ref<any[]>([]);
+  const userStore = useUserStore();
+  const userOrgCode = userStore.getUserInfo?.orgCode || '';
   const initData = async () => {
     queryParams.value.startTime = getFieldsValue().time.split(',')[0];
     queryParams.value.endTime = getFieldsValue().time.split(',')[1];
@@ -656,7 +659,11 @@
     desc3PageNo.value = 1;
     const orgRes = await getDepart3ListWithSecurity();
     orgList.value = orgRes;
-    orgCode3.value = orgRes.length === 1 ? orgRes[0].orgCode : undefined;
+    // 用户自己的 orgCode 在列表中能找到就选中，否则不默认（admin 等超管场景）
+    // userOrgCode 是四级编码(如 A04B01C11D02)，orgList 是三级编码(如 A04B01C11)
+    // 找 userOrgCode 以哪个三级 orgCode 开头，就选中那条
+    const matched = orgRes.find((item) => item.orgCode && userOrgCode.startsWith(item.orgCode));
+    orgCode3.value = matched ? matched.orgCode : undefined;
     getData3();
     getData4();
   };
