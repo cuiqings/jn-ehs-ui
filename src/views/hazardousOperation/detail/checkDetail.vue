@@ -78,33 +78,23 @@
 
   const tableWrapRef = ref<HTMLElement | null>(null);
 
-  // 抽屉的滚动容器和表格 thead 的引用，在 pageInit 后绑定
   let scrollContainer: HTMLElement | null = null;
   let thead: HTMLElement | null = null;
 
-  /**
-   * 核心逻辑：
-   * scrollContainer 是 .scrollbar__wrap（overflow: auto），它是抽屉的真实滚动容器。
-   * 当滚动容器的 scrollTop 超过表格顶部到容器顶部的距离时，
-   * thead 已经"滚出"视野，此时用 translateY 将 thead 往下推同等偏移量，
-   * 让它始终贴在容器可视区的顶部。
-   */
   function onScroll() {
     if (!scrollContainer || !thead || !tableWrapRef.value) return;
 
-    // 表格整体相对滚动容器的顶部偏移（不随滚动变化的静态值）
+    
     const tableTop = tableWrapRef.value.getBoundingClientRect().top
       - scrollContainer.getBoundingClientRect().top
       + scrollContainer.scrollTop;
 
-    // 当前已经滚过的距离
     const scrolled = scrollContainer.scrollTop;
 
-    // 滚出表格顶部的量，即需要把 thead 向下推的量
+
     const offset = Math.max(0, scrolled - tableTop);
 
     thead.style.transform = `translateY(${offset}px)`;
-    // 保证 thead 始终在内容上方可见
     thead.style.position = 'relative';
     thead.style.zIndex = '2';
   }
@@ -112,7 +102,6 @@
   function bindScroll() {
     if (!tableWrapRef.value) return;
 
-    // 向上找最近的 .scrollbar__wrap 滚动容器
     let el: HTMLElement | null = tableWrapRef.value.parentElement;
     while (el) {
       if (el.classList.contains('scrollbar__wrap')) {
@@ -124,7 +113,7 @@
 
     if (!scrollContainer) return;
 
-    // 找 thead 元素
+    
     thead = tableWrapRef.value.querySelector<HTMLElement>('.ant-table-thead');
     if (!thead) return;
 
