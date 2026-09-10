@@ -12,7 +12,39 @@
           <JImageUpload disabled v-model:value="record.zgimgUrl" />
         </template>
         <template v-if="column.key === 'transfer'">
-          {{ record.transfer == '1' ? '是' : '否' }}
+          <div v-if="record.transfer !== '1'">未转交</div>
+          <div v-else>
+            <div style="margin-bottom: 4px">
+              <span style="color: #1890ff; font-weight: 600">(1)</span> 已转交
+            </div>
+            <div style="margin-bottom: 8px">
+              <div><span style="color: #1890ff; font-weight: 600">(2)</span> 转交人:</div>
+              <div style="padding: 4px 0; color: #333">{{ record.assignName }}</div>
+            </div>
+            <div style="margin-bottom: 8px">
+              <div><span style="color: #1890ff; font-weight: 600">(3)</span> 转交原因:</div>
+              <div style="padding: 4px 0; color: #333">{{ record.roleAssignRemark }}</div>
+            </div>
+            <div v-if="record.annex && record.annex.length">
+              <div style="margin-bottom: 4px"><span style="color: #1890ff; font-weight: 600">(4)</span> 转交附件:</div>
+              <div style="display: flex; flex-wrap: wrap; gap: 8px">
+                <template v-for="(url, idx) in record.annex" :key="idx">
+                  <JImageUpload
+                    v-if="isImg(url)"
+                    :value="url"
+                    disabled
+                    text=""
+                    bizPath="hiddenTrouble"
+                  />
+                  <span
+                    v-else
+                    style="color: #1890ff; cursor: pointer"
+                    @click="previewAnnex(url)"
+                  >{{ url.split('/').pop() }}</span>
+                </template>
+              </div>
+            </div>
+          </div>
         </template>
         <template v-if="column.key === 'unitType'">
           {{
@@ -40,6 +72,9 @@
   import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue';
   import { JImageUpload } from '/@/components/Form';
   import CheckImgView from '../components/CheckImgView.vue';
+  import { getFileAccessHttpUrl } from '/@/utils/common/compUtils';
+  import { createImgPreview } from '/@/components/Preview/index';
+  import { previewFile } from '/@/api/common/api';
 
   const tableWrapRef = ref<HTMLElement | null>(null);
 
@@ -159,7 +194,7 @@
       title: '是否转交权限',
       dataIndex: 'transfer',
       key: 'transfer',
-      width: 200,
+      width: 260,
       scopedSlots: { customRender: 'transfer' },
     },
     {
@@ -219,6 +254,29 @@
   ];
 
   const workCheckList = ref([]);
+
+  // 预览附件（图片直接预览，PDF新窗口预览，Word/Excel直接下载）
+  const imgExts = ['png', 'jpg', 'jpeg', 'gif', 'bmp', 'webp'];
+  const pdfExts = ['pdf'];
+  function isImg(url: string) {
+    return imgExts.includes(url.split('.').pop()?.toLowerCase() || '');
+  }
+  function previewAnnex(url: string) {
+    const ext = url.split('.').pop()?.toLowerCase() || '';
+    const fullUrl = getFileAccessHttpUrl(url);
+    if (imgExts.includes(ext)) {
+      // 图片：大图预览
+      createImgPreview({ imageList: [fullUrl] });
+    } else if (pdfExts.includes(ext)) {
+      // PDF：浏览器可直接预览
+      previewFile(url).then((res) => {
+        window.open(res, '_blank');
+      });
+    } else {
+      // Word / Excel 等：直接下载
+      window.open(fullUrl, '_blank');
+    }
+  }
 
   const pageInit = (res) => {
     let columnSplit: number[] = [];

@@ -119,8 +119,7 @@ export const useContent = () => {
       title: '安全作业检查',
       dataIndex: 'checkResult',
       key: 'checkResult',
-      ellipsis: true,
-      width: 130,
+      width: 260,
     },
     {
       title: '操作',
@@ -189,8 +188,7 @@ export const useContent = () => {
       title: '安全作业检查',
       dataIndex: 'checkResult',
       key: 'checkResult',
-      ellipsis: true,
-      width: 130,
+      width: 260,
     },
     {
       title: '操作',
