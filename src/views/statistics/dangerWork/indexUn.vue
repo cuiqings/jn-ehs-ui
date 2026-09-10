@@ -101,7 +101,7 @@
           <div class="right">
             所属单位：
             <a-select style="width: 220px" v-model:value="orgCode1" @change="handleChange1" placeholder="请选择" allowClear>
-              <a-select-option v-for="item in orgList" :key="item.orgCode">{{ item.departName }}</a-select-option>
+              <a-select-option v-for="item in orgList" :key="item.orgCode" :value="item.orgCode">{{ item.departName }}</a-select-option>
             </a-select>
           </div>
         </div>
@@ -164,12 +164,26 @@
           <div class="right">
             检查单位：
             <a-select style="width: 220px" v-model:value="orgCode2" @change="handleChange2" placeholder="请选择" allowClear>
-              <a-select-option v-for="item in orgList" :key="item.orgCode">{{ item.departName }}</a-select-option>
+              <a-select-option v-for="item in orgList" :key="item.orgCode" :value="item.orgCode">{{ item.departName }}</a-select-option>
             </a-select>
             <a-button style="margin-left: 8px" type="primary" :loading="exportIng" @click="handleExport">导出</a-button>
           </div>
         </div>
-        <a-table :loading="loading9" :columns="columns3Un" :data-source="listDesc" :pagination="false" bordered>
+        <a-table
+          :loading="loading9"
+          :columns="columns3Un"
+          :data-source="listDesc"
+          :pagination="{
+            current: desc2PageNo,
+            pageSize: desc2PageSize,
+            total: desc2Total,
+            showSizeChanger: true,
+            showQuickJumper: true,
+            showTotal: () => `共 ${desc2Total} 条`,
+            onChange: onDesc2PageChange,
+            onShowSizeChange: onDesc2SizeChange,
+          }"
+          bordered>
           <template #bodyCell="{ column, record, index }">
             <template v-if="column.key === 'index'">
               {{ index + 1 }}
@@ -202,7 +216,11 @@
   import LineBar from '../components/lineBar.vue';
   import dayjs from 'dayjs';
   import { downloadFileAll, getDepart3ListWithSecurity } from '/@/api/common/api';
+  import { useUserStore } from '/@/store/modules/user';
   const { workStatusList, departList, columnsUn, columns2Un, columns3Un, onView, onExportWork, register, downloading } = useContent();
+
+  const userStore = useUserStore();
+  const userOrgCode = userStore.getUserInfo?.orgCode || '';
   //自定义表单字段
   const formSchemas: FormSchema[] = [
     {
@@ -284,10 +302,12 @@
     await getTotalData();
     await lineBarInit3();
     getData();
+    desc2PageNo.value = 1;
+    const orgRes = await getDepart3ListWithSecurity();
+    orgList.value = orgRes;
+    const matched = orgRes.find((item) => item.orgCode && userOrgCode.startsWith(item.orgCode));
+    orgCode2.value = matched ? matched.orgCode : undefined;
     getData2();
-    getDepart3ListWithSecurity().then((res) => {
-      orgList.value = res;
-    });
   };
 
   const orgCode1 = ref(undefined);
@@ -297,6 +317,17 @@
     getData();
   };
   const handleChange2 = () => {
+    desc2PageNo.value = 1;
+    getData2();
+  };
+  const onDesc2PageChange = (page: number, pageSize: number) => {
+    desc2PageNo.value = page;
+    desc2PageSize.value = pageSize;
+    getData2();
+  };
+  const onDesc2SizeChange = (current: number, size: number) => {
+    desc2PageNo.value = 1;
+    desc2PageSize.value = size;
     getData2();
   };
 
@@ -531,18 +562,26 @@
     data2.value = res.list;
   }
   const loading9 = ref(false);
+  const desc2PageNo = ref(1);
+  const desc2PageSize = ref(10);
+  const desc2Total = ref(0);
   async function getData2() {
     loading9.value = true;
-    let res = await getDangerousDescUn({
-      startDate: queryParams.value.startTime,
-      endDate: queryParams.value.endTime,
-      orgCode: orgCode2.value,
-    }).finally(() => {
+    try {
+      let res = await getDangerousDescUn({
+        startDate: queryParams.value.startTime,
+        endDate: queryParams.value.endTime,
+        orgCode: orgCode2.value,
+        pageNo: desc2PageNo.value,
+        pageSize: desc2PageSize.value,
+      });
+      listDesc.value = res.listDesc;
+      desc2Total.value = res.total || 0;
+      desc1.value = res.desc1;
+      desc2.value = res.desc2;
+    } finally {
       loading9.value = false;
-    });
-    listDesc.value = res.listDesc;
-    desc1.value = res.desc1;
-    desc2.value = res.desc2;
+    }
   }
   /**
    * 比较两个百分数的大小
