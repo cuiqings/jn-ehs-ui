@@ -422,8 +422,8 @@
             </template>
             <template v-if="column.key === 'aqkzCheckNumThree'">
               <span
-                :style="{ color: comparePercent(record.aqkzCheckRatioThree, '60%') == -1 && record.aqkzShouldCheckNumThree > 0 ? '#ff4d4f' : '' }"
-                >{{ record.aqkCheckNumThree }}</span
+                :style="{ color: comparePercent(record.aqkzCheckRatioThree, '60%') == -1 && record.aqkzCheckNumThree > 0 ? '#ff4d4f' : '' }"
+                >{{ record.aqkzCheckNumThree }}</span
               >
             </template>
             <template v-if="column.key === 'aqkzCheckRatioThree'">

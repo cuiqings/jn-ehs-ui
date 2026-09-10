@@ -33,9 +33,6 @@
 
           <van-button v-if="(item.startDrill === '0' && !item.approvalStatus && !item.trainContentFlag) || item.approvalStatus == 2" type="primary"
             @click.stop="approveClick(item, '演练记录')">演练记录</van-button>
-            
-          <van-button v-if="item.approvalStatus === '1'" type="primary"
-            @click.stop="approveClick(item, '演练总结')">演练总结</van-button>
 
           <van-button type="primary" @click.stop="openDetail(item)">查看详情</van-button>
         </template>

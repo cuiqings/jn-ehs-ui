@@ -35,18 +35,29 @@
               text="上传附件"
             />
           </a-form-item>
-        </template>
-        <template v-if="['演练总结'].includes(title)">
-          <a-form-item :labelCol="{ span: 5 }" label="5、演练总结" name="drillSummary" :rules="[{ required: true, message: '请上传' }]">
-            <JUpload accept=".doc,.docx,.pdf,.xls,.xlsx" ref="uploadRef" :maxCount="10" v-model:value="formState.drillSummary" text="上传附件" />
+          <a-form-item label="5、演练总结" name="drillSummary" :rules="title == '演练方案' ? [{ required: true, message: '请上传' }] : []">
+            <JUpload
+              accept=".doc,.docx,.pdf,.xls,.xlsx"
+              :disabled="title == '详情'"
+              ref="uploadRef"
+              :maxCount="10"
+              v-model:value="formState.drillSummary"
+              text="上传附件"
+            />
           </a-form-item>
           <a-form-item
-            :labelCol="{ span: 5 }"
             label="6、演练存在不足之处整改落实情况"
             name="drillCorrective"
-            :rules="[{ required: true, message: '请上传' }]"
+            :rules="title == '演练方案' ? [{ required: true, message: '请上传' }] : []"
           >
-            <JUpload accept=".doc,.docx,.pdf,.xls,.xlsx" ref="uploadRef" :maxCount="10" v-model:value="formState.drillCorrective" text="上传附件" />
+            <JUpload
+              accept=".doc,.docx,.pdf,.xls,.xlsx"
+              :disabled="title == '详情'"
+              ref="uploadRef"
+              :maxCount="10"
+              v-model:value="formState.drillCorrective"
+              text="上传附件"
+            />
           </a-form-item>
         </template>
         <template v-if="['影像资料', '详情'].includes(title)">
@@ -201,6 +212,8 @@
         res.drillScheme = res.drillScheme?.join(',');
         res.drillEmergencyPlan = res.drillEmergencyPlan?.join(',');
         res.drillScript = res.drillScript?.join(',');
+        res.drillSummary = res.drillSummary?.join(',');
+        res.drillCorrective = res.drillCorrective?.join(',');
         Object.assign(detailInfo.value, res);
         if(res.approvalStatus == 2) {
           const jsonObject = data.jsonObject
@@ -234,6 +247,8 @@
     purpose1: '',
     record1: '',
     rescue1: '',
+    drillSummary: '',
+    drillCorrective: '',
     personArrival: ['迅速准确、按时到位'],
     workMaterial: ['充分、有效'],
     personalProtection: ['防护到位'],
@@ -290,6 +305,8 @@
       params.drillScheme = params.drillScheme.split(',');
       params.drillEmergencyPlan = params.drillEmergencyPlan.split(',');
       params.drillScript = params.drillScript.split(',');
+      params.drillSummary = params.drillSummary ? params.drillSummary.split(',') : [];
+      params.drillCorrective = params.drillCorrective ? params.drillCorrective.split(',') : [];
       drillScheme(params)
         .then(() => {
           submitIng.value = false;
@@ -362,20 +379,6 @@
         });
       });
       drillRecord(params)
-        .then(() => {
-          submitIng.value = false;
-          closeDrawer();
-          emits('success');
-        })
-        .catch(() => {
-          submitIng.value = false;
-        });
-      return false;
-    }
-    if (title.value == '演练总结') {
-      params.drillSummary = params.drillSummary.split(',');
-      params.drillCorrective = params.drillCorrective.split(',');
-      drillSummary(params)
         .then(() => {
           submitIng.value = false;
           closeDrawer();

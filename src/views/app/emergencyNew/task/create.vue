@@ -28,6 +28,21 @@
                 <AppCustomizeUpload accept=".doc,.docx,.pdf,.xls,.xlsx" :max-count="10" v-model:fileList="formState.drillScript" />
               </template>
             </van-field>
+            <van-field required label="5、演练总结" name="drillSummary" :rules="[{ required: true, message: '请上传' }]">
+              <template #input>
+                <AppCustomizeUpload accept=".doc,.docx,.pdf,.xls,.xlsx" :maxCount="10" v-model:fileList="formState.drillSummary" />
+              </template>
+            </van-field>
+            <van-field
+              required
+              label="6、演练存在不足之处整改落实情况"
+              name="drillCorrective"
+              :rules="[{ required: true, message: '请上传' }]"
+            >
+              <template #input>
+                <AppCustomizeUpload accept=".doc,.docx,.pdf,.xls,.xlsx" :maxCount="10" v-model:fileList="formState.drillCorrective" />
+              </template>
+            </van-field>
           </template>
           <template v-if="['影像资料'].includes(title)">
             <van-field required label="7、演练影像资料" name="drillVideoData" :rules="[{ required: true, message: '请上传' }]">
@@ -190,22 +205,6 @@
             </van-field>
           </template>
           <template v-if="title == '演练总结'">
-            <van-field required :labelCol="{ span: 5 }" label="5、演练总结" name="drillSummary" :rules="[{ required: true, message: '请上传' }]">
-              <template #input>
-                <AppCustomizeUpload accept=".doc,.docx,.pdf,.xls,.xlsx" :maxCount="10" v-model:fileList="formState.drillSummary" />
-              </template>
-            </van-field>
-            <van-field
-              required
-              :labelCol="{ span: 5 }"
-              label="6、演练存在不足之处整改落实情况"
-              name="drillCorrective"
-              :rules="[{ required: true, message: '请上传' }]"
-            >
-              <template #input>
-                <AppCustomizeUpload accept=".doc,.docx,.pdf,.xls,.xlsx" :maxCount="10" v-model:fileList="formState.drillCorrective" />
-              </template>
-            </van-field>
           </template>
         </van-form>
       </van-collapse-item>
@@ -320,6 +319,8 @@
       params.drillScheme = params.drillScheme.split(',');
       params.drillEmergencyPlan = params.drillEmergencyPlan.split(',');
       params.drillScript = params.drillScript.split(',');
+      params.drillSummary = params.drillSummary ? params.drillSummary.split(',') : [];
+      params.drillCorrective = params.drillCorrective ? params.drillCorrective.split(',') : [];
       drillScheme(params)
         .then((res) => {
           submitIng.value = false;
@@ -401,18 +402,6 @@
           submitIng.value = false;
         });
       return false;
-    }
-    if (title.value == '演练总结') {
-      params.drillSummary = params.drillSummary.split(',');
-      params.drillCorrective = params.drillCorrective.split(',');
-      drillSummary(params)
-        .then((res) => {
-          submitIng.value = false;
-          router.back();
-        })
-        .catch((err) => {
-          submitIng.value = false;
-        });
     }
   };
   const cancel = () => {
