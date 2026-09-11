@@ -1,6 +1,6 @@
 <template>
   <div ref="tableWrapRef" class="check-table-wrap">
-    <a-table :pagination="false" :dataSource="workCheckList" :columns="columns">
+    <a-table :pagination="false" :dataSource="workCheckList" :columns="tableColumns">
       <template #bodyCell="{ column, record }">
         <template v-if="column.key === 'imgUrl'">
           <CheckImgView :record="record" />
@@ -63,40 +63,75 @@
               : ''
           }}
         </template>
+        <template v-if="column.key === 'action'">
+          <a-popconfirm
+            v-if="isCurrentUserRow(record)"
+            title="确认删除该检查记录？"
+            ok-text="确认"
+            cancel-text="取消"
+            :overlayStyle="{ zIndex: 9999 }"
+            @confirm="handleDelete(record)"
+          >
+            <a-button type="link" danger size="small">删除</a-button>
+          </a-popconfirm>
+        </template>
       </template>
     </a-table>
   </div>
 </template>
 
 <script setup lang="ts">
-  import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue';
+  import { ref, computed, onMounted, onBeforeUnmount, nextTick } from 'vue';
   import { JImageUpload } from '/@/components/Form';
   import CheckImgView from '../components/CheckImgView.vue';
   import { getFileAccessHttpUrl } from '/@/utils/common/compUtils';
   import { createImgPreview } from '/@/components/Preview/index';
   import { previewFile } from '/@/api/common/api';
+  import { deleteWorkCheck } from '../api';
+  import { useMessage } from '/@/hooks/web/useMessage';
+  import { useUserStore } from '/@/store/modules/user';
+
+  const { createMessage } = useMessage();
+  const userStore = useUserStore();
+
+  const props = defineProps({
+    // 作业状态：进行中='3'，作业中断='7'
+    workState: {
+      type: String,
+      default: '',
+    },
+  });
+
+  const emit = defineEmits(['refresh']);
+
+  // 是否显示删除按钮：仅进行中(3/"作业中") 或作业中断(7/"作业中断") 状态
+  const canDelete = computed(() => {
+    const s = props.workState;
+    return s === '3' || s === '7' || s === '作业中' || s === '作业中断';
+  });
 
   const tableWrapRef = ref<HTMLElement | null>(null);
 
   let scrollContainer: HTMLElement | null = null;
-  let thead: HTMLElement | null = null;
+  let resizeObserver: ResizeObserver | null = null;
 
   function onScroll() {
-    if (!scrollContainer || !thead || !tableWrapRef.value) return;
+    if (!scrollContainer || !tableWrapRef.value) return;
 
-    
     const tableTop = tableWrapRef.value.getBoundingClientRect().top
       - scrollContainer.getBoundingClientRect().top
       + scrollContainer.scrollTop;
 
     const scrolled = scrollContainer.scrollTop;
-
-
     const offset = Math.max(0, scrolled - tableTop);
 
-    thead.style.transform = `translateY(${offset}px)`;
-    thead.style.position = 'relative';
-    thead.style.zIndex = '2';
+    // 同时处理主表格和所有固定列表格的表头
+    const allTheads = tableWrapRef.value.querySelectorAll<HTMLElement>('.ant-table-thead');
+    allTheads.forEach((th) => {
+      th.style.transform = `translateY(${offset}px)`;
+      th.style.position = 'relative';
+      th.style.zIndex = '2';
+    });
   }
 
   function bindScroll() {
@@ -113,19 +148,25 @@
 
     if (!scrollContainer) return;
 
-    
-    thead = tableWrapRef.value.querySelector<HTMLElement>('.ant-table-thead');
-    if (!thead) return;
-
     scrollContainer.addEventListener('scroll', onScroll, { passive: true });
+
+    // 监听容器尺寸变化，重新计算表头偏移
+    resizeObserver = new ResizeObserver(() => {
+      onScroll();
+    });
+    resizeObserver.observe(scrollContainer);
+    resizeObserver.observe(tableWrapRef.value);
   }
 
   function unbindScroll() {
     if (scrollContainer) {
       scrollContainer.removeEventListener('scroll', onScroll);
     }
+    if (resizeObserver) {
+      resizeObserver.disconnect();
+      resizeObserver = null;
+    }
     scrollContainer = null;
-    thead = null;
   }
 
   onMounted(() => {
@@ -242,6 +283,18 @@
     },
   ];
 
+  const tableColumns = computed(() => {
+    if (!canDelete.value) return columns;
+    return [
+      ...columns,
+      {
+        title: '操作',
+        key: 'action',
+        width: 80,
+      },
+    ];
+  });
+
   const workCheckList = ref([]);
 
   // 预览附件（图片直接预览，PDF新窗口预览，Word/Excel直接下载）
@@ -266,6 +319,23 @@
       window.open(fullUrl, '_blank');
     }
   }
+
+  // 判断该行是否属于当前登录用户的检查记录
+  // 后端检查记录只有 head（检查人姓名），用 realname 比对
+  const isCurrentUserRow = (record) => {
+    const realname = String(userStore.getUserInfo?.realname || '');
+    if (!realname) return false;
+    const head = String(record.head || '');
+    return head !== '' && head === realname;
+  };
+
+  // 删除检查记录
+  const handleDelete = async (record) => {
+    // record 经过 pageInit 展开，原始检查记录的 id 存在 record.id 上
+    await deleteWorkCheck({ id: record.id });
+    createMessage.success('删除成功');
+    emit('refresh');
+  };
 
   const pageInit = (res) => {
     let columnSplit: number[] = [];
@@ -319,14 +389,13 @@
     }
     workCheckList.value = data;
 
-    // 数据加载后重新查找 thead（a-table 可能在数据变化后重新渲染）
+    // 数据加载后重新触发一次滚动位置同步
     nextTick(() => {
-      if (tableWrapRef.value) {
-        thead = tableWrapRef.value.querySelector<HTMLElement>('.ant-table-thead');
-      }
       // 若滚动容器还未绑定（首次 pageInit 早于 onMounted），则重新绑定
       if (!scrollContainer) {
         bindScroll();
+      } else {
+        onScroll();
       }
     });
   };
@@ -345,6 +414,13 @@
 
 /* thead 使用 relative + translateY 来模拟 sticky，需要确保它能脱离正常流叠在内容上 */
 :deep(.ant-table-thead) {
+  position: relative;
+  z-index: 2;
+}
+
+/* 固定列（fixed: right/left）的表头也需要同样处理 */
+:deep(.ant-table-fixed-right .ant-table-thead),
+:deep(.ant-table-fixed-left .ant-table-thead) {
   position: relative;
   z-index: 2;
 }

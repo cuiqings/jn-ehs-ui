@@ -80,6 +80,8 @@ enum Api {
   spaceConfirm = '/accessSpace/confirm',
   // 整改查询
   workCheckList = '/workCheck/list/',
+  // 删除安全作业检查记录
+  deleteWorkCheck = '/workCheck/deleteWorkCheck',
   // 整改提交
   workCheck = '/workCheck/reform',
   // 确认整改
@@ -409,6 +411,10 @@ export const securityConfirmation = (params) => {
 };
 export const getWorkCheckList = (params) => {
   return defHttp.get({ url: Api.getWorkCheckList, params });
+};
+// 删除安全作业检查记录
+export const deleteWorkCheck = (params) => {
+  return defHttp.post({ url: Api.deleteWorkCheck, params });
 };
 export const queryFcUser = () => {
   return defHttp.get({ url: Api.queryFcUser });

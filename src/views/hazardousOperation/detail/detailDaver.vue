@@ -38,7 +38,7 @@
         </a-tab-pane>
         <a-tab-pane key="3" tab="安全作业检查" forceRender v-if="workCheckList.length > 0">
           <div class="zrr">责任人：{{ workList[0].sceneHeadName }}</div>
-          <CheckDetail ref="checkDetailRef" :workCheckList="workCheckList" />
+          <CheckDetail ref="checkDetailRef" :workCheckList="workCheckList" :work-state="currentShowDelete ? currentWorkState : ''" @refresh="refreshCheckList" />
         </a-tab-pane>
       </a-tabs>
       <template v-if="workList[0].examineInfoList && workList[0].examineInfoList.length > 1 && activeKey == '1'">
@@ -416,6 +416,9 @@
   const formData = ref<any>({});
   const workCheckList = ref<any[]>([]);
   const checkDetailRef = ref<any>();
+  const currentWorkId = ref<string>('');
+  const currentWorkState = ref<string>('');
+  const currentShowDelete = ref<boolean>(false);
   const { colum4, colum5, colum6, colum7 } = usePublicData();
 
   const jiaodiFormState = ref<any>({});
@@ -423,6 +426,11 @@
     loading.value = true;
     readonly.value = data.readOnly;
     pageType.value = data.pageType;
+    currentWorkId.value = data.id;
+    // workState 直接从外部传入（统计页 onView 会带上），作为判断删除权限的依据
+    currentWorkState.value = String(data.workState ?? '');
+    // 只有作业管理打开时传 showDelete: true，其他入口不显示删除按钮
+    currentShowDelete.value = !!data.showDelete;
     const res = await getWorkDetail(data.id);
     const workExamineInfo = await getWorkJobWorkDetail(data.id);
     formData.value = res;
@@ -477,6 +485,9 @@
 
   const close = () => {
     activeKey.value = '1';
+    currentWorkId.value = '';
+    currentWorkState.value = '';
+    currentShowDelete.value = false;
     workStore.resetWorkList();
     jobMessageRef.value.map((item) => {
       item.reset();
@@ -511,6 +522,19 @@
 
   const refresh = () => {
     emit('renewal');
+  };
+
+  // 删除检查记录后刷新检查列表
+  const refreshCheckList = () => {
+    if (!currentWorkId.value) return;
+    getWorkCheckList({ workApplyId: currentWorkId.value }).then((res) => {
+      workCheckList.value = res;
+      nextTick(() => {
+        if (res && res.length > 0) {
+          checkDetailRef.value?.pageInit(res);
+        }
+      });
+    });
   };
 
   // 是否展示气体分析

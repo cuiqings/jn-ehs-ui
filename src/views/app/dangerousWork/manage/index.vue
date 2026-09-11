@@ -937,7 +937,7 @@
       url = `/app/unhazardousWork/detail`;
     }
     appStore.setActiveIdx(active.value);
-    router.push({ path: url, query: { id: item.id, workType: item.workType, pageType: 'detail', delayedMark: item.delayedMark ? '1' : '0' } });
+    router.push({ path: url, query: { id: item.id, workType: item.workType, pageType: 'detail', delayedMark: item.delayedMark ? '1' : '0', workState: item.workState, showDelete: '1' } });
   };
 
   const curItem = ref<any | undefined>();

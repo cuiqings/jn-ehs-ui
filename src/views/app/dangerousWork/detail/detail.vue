@@ -72,9 +72,29 @@
                 {{ item.result }}
               </template>
             </van-field>
-            <van-field name="delayReason" input-align="right" label="是否转交权限">
+            <van-field name="delayReason" label-align="top" input-align="left" label="是否转交权限">
               <template #input>
-                {{ item.transfer == '1' ? '是' : '否' }}
+                <div v-if="item.transfer !== '1'">未转交</div>
+                <div v-else>
+                  <div style="margin-bottom: 4px"><span style="color: #1890ff; font-weight: 600">(1)</span> 已转交</div>
+                  <div style="margin-bottom: 8px">
+                    <div><span style="color: #1890ff; font-weight: 600">(2)</span> 转交人:</div>
+                    <div style="padding: 4px 0; color: #333">{{ item.assignName }}</div>
+                  </div>
+                  <div style="margin-bottom: 8px">
+                    <div><span style="color: #1890ff; font-weight: 600">(3)</span> 转交原因:</div>
+                    <div style="padding: 4px 0; color: #333">{{ item.roleAssignRemark }}</div>
+                  </div>
+                  <div v-if="item.annex && item.annex.length">
+                    <div style="margin-bottom: 4px"><span style="color: #1890ff; font-weight: 600">(4)</span> 转交附件:</div>
+                    <div style="display: flex; flex-wrap: wrap; gap: 8px">
+                      <template v-for="(url, idx) in item.annex" :key="idx">
+                        <AppUpload v-if="isAnnexImg(url)" :fileList="url" :disabled="true" />
+                        <span v-else style="color: #1890ff" @click="previewAnnexFile(url)">{{ url.split('/').pop() }}</span>
+                      </template>
+                    </div>
+                  </div>
+                </div>
               </template>
             </van-field>
             <van-field name="delayReason" input-align="right" label="隐患类别">
@@ -109,6 +129,15 @@
               <van-field label-width="110" readonly v-model="citem.confirmHeadName" name="confirmHeadName" input-align="right" label="确认人" />
               <van-field label-width="110" readonly v-model="citem.confirmTime" name="confirmTime" input-align="right" label="确认时间" />
             </div>
+            <!-- 删除按钮：仅进行中/作业中断状态且属于当前用户的检查记录显示 -->
+            <div v-if="canDeleteCheck && isMyCheckRecord(item)" class="check-delete-row">
+              <van-button
+                type="danger"
+                size="small"
+                plain
+                @click="handleDeleteCheck(item)"
+              >删除</van-button>
+            </div>
           </div>
         </van-tab>
       </van-tabs>
@@ -125,7 +154,7 @@
   import ApprovalProcess from './components/approvalProcess.vue';
   import ecsDialog from '../components/ecsDialog.vue';
   import SafetySubmit from './components/safetySubmit.vue';
-  import { getWorkJobWorkDetail, getWorkDetail, getWorkCheckList, postStartWork } from '../../../hazardousOperation/api/index';
+  import { getWorkJobWorkDetail, getWorkDetail, getWorkCheckList, postStartWork, deleteWorkCheck } from '../../../hazardousOperation/api/index';
   import { getFileAccessHttpUrl } from '/@/utils/common/compUtils';
   import { useRoute, useRouter } from 'vue-router';
   import DealyDialogReview from '../components/delayDialogReview.vue';
@@ -139,11 +168,45 @@
   import CheckImgView from '../components/checkImgView.vue';
   import { hasCheckImg } from '/@/views/hazardousOperation/constants/checkImg';
   import { useWorkStore } from '/@/store/modules/dangerousWork';
-  import { showSuccessToast } from 'vant';
+  import { showSuccessToast, showConfirmDialog } from 'vant';
+  import { useUserStore } from '/@/store/modules/user';
 
   setAppTitle();
   const workStore = useWorkStore();
   const workList = computed(() => workStore.getWorkList);
+
+  const userStore = useUserStore();
+  // 只有从作业管理（showDelete=1）且状态为进行中/作业中断时才允许删除
+  const canDeleteCheck = computed(() => {
+    if (route.query.showDelete !== '1') return false;
+    const s = String(route.query.workState || '');
+    return s === '3' || s === '7' || s === '作业中' || s === '作业中断';
+  });
+  // 判断转交附件是否是图片
+  const annexImgExts = ['png', 'jpg', 'jpeg', 'gif', 'bmp', 'webp'];
+  const isAnnexImg = (url: string) => annexImgExts.includes(url.split('.').pop()?.toLowerCase() || '');
+  // 预览非图片附件
+  const previewAnnexFile = (url: string) => window.open(getFileAccessHttpUrl(url), '_blank');
+
+  // 判断该检查记录是否属于当前登录用户（用 realname 比对 head 姓名）
+  const isMyCheckRecord = (item) => {
+    const realname = String(userStore.getUserInfo?.realname || '');
+    if (!realname) return false;
+    return String(item.head || '') === realname;
+  };
+  // 删除检查记录
+  const handleDeleteCheck = (item) => {
+    showConfirmDialog({ title: '提示', message: '确认删除该检查记录？' })
+      .then(async () => {
+        await deleteWorkCheck({ id: item.id });
+        showSuccessToast('删除成功');
+        // 刷新检查列表
+        getWorkCheckList({ workApplyId: route.query.id }).then((res) => {
+          workCheckList.value = res;
+        });
+      })
+      .catch(() => {});
+  };
 
   const loading = ref(false);
   const route = useRoute();
@@ -367,6 +430,12 @@
   .item-info {
     background-color: #ffffff;
     padding-left: 12px;
+  }
+  .check-delete-row {
+    display: flex;
+    justify-content: flex-end;
+    padding: 8px 16px 12px;
+    background-color: #f5f5f5;
   }
   .foot {
     height: 44px;

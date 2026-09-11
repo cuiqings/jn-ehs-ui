@@ -1054,6 +1054,7 @@ export const useContent = () => {
     openDrawer(true, {
       id: record.id,
       title: record.workTypeName,
+      workState: record.workState,
     });
   };
   const downloading = ref(false);

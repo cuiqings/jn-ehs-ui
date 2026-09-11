@@ -877,6 +877,8 @@
       openDrawer(true, {
         id: item.id,
         title: item.workTypeName,
+        workState: item.workState || state.value,
+        showDelete: true,
       });
     }
   };
