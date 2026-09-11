@@ -1,13 +1,14 @@
 <template>
   <div class="facility-panel">
-    <div class="panel-left">
+    <!-- 上：各事业部设备设施状态统计 -->
+    <div class="panel-block">
       <div class="panel-header">
         <span class="header-line"></span>
         <span class="header-title">各事业部设备设施状态统计</span>
       </div>
       <div class="panel-content">
         <a-table :columns="equipmentColumns" :data-source="equipmentData" :pagination="false" :loading="equipmentLoading" size="middle" bordered row-key="id">
-          <template #bodyCell="{ column, text, record }">
+          <template #bodyCell="{ column, text }">
             <template v-if="column.key === 'rate1'">
               <span :style="{ color: getRateColor(text) }">{{ text !== '-' ? text + '%' : text }}</span>
             </template>
@@ -19,7 +20,8 @@
       </div>
     </div>
 
-    <div class="panel-right">
+    <!-- 下：各事业部脱水器点检完成率 -->
+    <div class="panel-block">
       <div class="panel-header">
         <span class="header-line"></span>
         <span class="header-title">各事业部脱水器点检完成率</span>
@@ -32,11 +34,17 @@
           :loading="inspectionLoading"
           size="middle"
           bordered
-          row-key="id"
+          row-key="org"
         >
-          <template #bodyCell="{ column, text, record, index }">
+          <template #bodyCell="{ column, text, record }">
             <template v-if="column.key === 'rank'">
-              <div class="rank-badge" :class="getRankClass(index + 1)">{{ index + 1 }}</div>
+              <div class="rank-badge" :class="getRankClass(record.index)">{{ record.index }}</div>
+            </template>
+            <template v-if="column.key === 'checkedCount'">
+              <span style="color: #52c41a">{{ text }}</span>
+            </template>
+            <template v-if="column.key === 'uncheckedCount'">
+              <span :style="{ color: Number(text) > 0 ? '#f5222d' : 'inherit' }">{{ text }}</span>
             </template>
             <template v-if="column.key === 'rate'">
               <span class="rate-success">{{ text !== '-' ? text + '%' : text }}</span>
@@ -49,7 +57,7 @@
 </template>
 
 <script lang="ts" setup>
-  import { ref, onMounted, h } from 'vue';
+  import { ref, h } from 'vue';
   import { getEquipmentStatusStatistics, getEquipmentCheckStatistics } from '../api';
 
   const equipmentLoading = ref(false);
@@ -57,16 +65,12 @@
   const equipmentData = ref([]);
   const inspectionData = ref([]);
 
-  /**
-   * 获取用于排序的数值，'-' 视为 -1
-   * @param rate 比率字符串
-   */
   const getSortValue = (rate: string) => {
     if (rate === '-' || rate === null || rate === undefined) return -1;
     return parseFloat(rate);
   };
 
-  // 左侧设备状态统计表头配置
+  // 设备设施状态统计表头
   const equipmentColumns = [
     {
       title: '事业部',
@@ -79,123 +83,51 @@
     {
       title: '灭火器',
       children: [
-        {
-          title: '正常',
-          dataIndex: 'count11',
-          key: 'count11',
-          align: 'center' as const,
-          customRender: ({ text }: any) => h('span', { style: 'color: #52c41a' }, text),
-        },
-        {
-          title: '超期未检',
-          dataIndex: 'count12',
-          key: 'count12',
-          align: 'center' as const,
-          customRender: ({ text }: any) => h('span', { style: 'color: #f5222d' }, text),
-        },
-        {
-          title: '即将到期',
-          dataIndex: 'count13',
-          key: 'count13',
-          align: 'center' as const,
-          customRender: ({ text }: any) => h('span', { style: 'color: #fa8c16' }, text),
-        },
-        {
-          title: '超期未检率',
-          dataIndex: 'rate1',
-          key: 'rate1',
-          align: 'center' as const,
-          sorter: (a: any, b: any) => getSortValue(a.rate1) - getSortValue(b.rate1),
-        },
+        { title: '正常', dataIndex: 'count11', key: 'count11', align: 'center' as const, customRender: ({ text }: any) => h('span', { style: { color: '#52c41a' } }, text) },
+        { title: '超期未检', dataIndex: 'count12', key: 'count12', align: 'center' as const, customRender: ({ text }: any) => h('span', { style: { color: '#f5222d' } }, text) },
+        { title: '即将到期', dataIndex: 'count13', key: 'count13', align: 'center' as const, customRender: ({ text }: any) => h('span', { style: { color: '#fa8c16' } }, text) },
+        { title: '超期未检率', dataIndex: 'rate1', key: 'rate1', align: 'center' as const, sorter: (a: any, b: any) => getSortValue(a.rate1) - getSortValue(b.rate1) },
       ],
     },
     {
       title: '绝缘工具',
       children: [
-        {
-          title: '正常',
-          dataIndex: 'count21',
-          key: 'count21',
-          align: 'center' as const,
-          customRender: ({ text }: any) => h('span', { style: 'color: #52c41a' }, text),
-        },
-        {
-          title: '超期未检',
-          dataIndex: 'count22',
-          key: 'count22',
-          align: 'center' as const,
-          customRender: ({ text }: any) => h('span', { style: 'color: #f5222d' }, text),
-        },
-        {
-          title: '即将到期',
-          dataIndex: 'count23',
-          key: 'count23',
-          align: 'center' as const,
-          customRender: ({ text }: any) => h('span', { style: 'color: #fa8c16' }, text),
-        },
-        {
-          title: '超期未检率',
-          dataIndex: 'rate2',
-          key: 'rate2',
-          align: 'center' as const,
-          sorter: (a: any, b: any) => getSortValue(a.rate2) - getSortValue(b.rate2),
-        },
+        { title: '正常', dataIndex: 'count21', key: 'count21', align: 'center' as const, customRender: ({ text }: any) => h('span', { style: { color: '#52c41a' } }, text) },
+        { title: '超期未检', dataIndex: 'count22', key: 'count22', align: 'center' as const, customRender: ({ text }: any) => h('span', { style: { color: '#f5222d' } }, text) },
+        { title: '即将到期', dataIndex: 'count23', key: 'count23', align: 'center' as const, customRender: ({ text }: any) => h('span', { style: { color: '#fa8c16' } }, text) },
+        { title: '超期未检率', dataIndex: 'rate2', key: 'rate2', align: 'center' as const, sorter: (a: any, b: any) => getSortValue(a.rate2) - getSortValue(b.rate2) },
       ],
     },
   ];
 
-  // 右侧点检完成率表头配置
+  // 脱水器点检完成率表头
   const inspectionColumns = [
-    {
-      title: '排名',
-      key: 'index',
-      dataIndex: 'index',
-      width: 80,
-      align: 'center' as const,
-    },
-    {
-      title: '事业部',
-      dataIndex: 'org',
-      key: 'org',
-      align: 'center' as const,
-    },
-    {
-      title: '点检完成率',
-      dataIndex: 'rate',
-      key: 'rate',
-      align: 'center' as const,
-    },
+    { title: '排名', key: 'rank', dataIndex: 'index', width: 70, align: 'center' as const },
+    { title: '事业部', dataIndex: 'org', key: 'org', align: 'center' as const },
+    { title: '点检任务数量', dataIndex: 'checkTaskSum', key: 'checkTaskSum', align: 'center' as const },
+    { title: '已点检数量', dataIndex: 'checkTask', key: 'checkedCount', align: 'center' as const },
+    { title: '未点检数量', dataIndex: 'noCheckTask', key: 'uncheckedCount', align: 'center' as const },
+    { title: '点检完成率', dataIndex: 'rate', key: 'rate', align: 'center' as const },
   ];
 
-  /**
-   * 获取超期未检率颜色
-   * @param rate 比率字符串
-   */
   const getRateColor = (rate: string) => {
     const val = parseFloat(rate);
     if (val > 10) return '#f5222d';
     if (val > 5) return '#fa8c16';
-    return '#f5222d'; // 根据图示，大部分是有颜色的，这里统一用红色系，或者根据实际逻辑调整
+    return '#f5222d';
   };
 
-  /**
-   * 获取排名徽章样式
-   * @param rank 排名
-   */
   const getRankClass = (rank: number) => {
-    if (rank <= 3) return `rank-${rank}`;
-    if (rank <= 9) return 'rank-blue';
-    return 'rank-red';
+    if (rank === 1) return 'rank-1';
+    if (rank === 2) return 'rank-2';
+    if (rank === 3) return 'rank-3';
+    return 'rank-blue';
   };
 
-  /**
-   * 获取设备状态统计数据
-   */
   const fetchEquipmentData = async (params?: any) => {
     equipmentLoading.value = true;
     try {
       const res = await getEquipmentStatusStatistics(params);
-      console.log('Equipment Status Statistics:', res);
       equipmentData.value = res || [];
     } catch (error) {
       console.error('Failed to fetch equipment data:', error);
@@ -204,14 +136,10 @@
     }
   };
 
-  /**
-   * 模拟获取点检完成率数据
-   */
-  const fetchInspectionData = async (params: any) => {
+  const fetchInspectionData = async (params?: any) => {
     inspectionLoading.value = true;
     try {
       const res = await getEquipmentCheckStatistics(params);
-      console.log('Inspection Statistics:', res);
       inspectionData.value = res || [];
     } catch (error) {
       console.error('Failed to fetch inspection data:', error);
@@ -220,9 +148,6 @@
     }
   };
 
-  /**
-   * 初始化数据
-   */
   const init = async (dateRange?: any, orgCode?: string) => {
     let params: any = {};
     if (dateRange) {
@@ -238,39 +163,25 @@
     fetchInspectionData(params);
   };
 
-  const resize = () => {
-    // 占位方法，适配父组件调用
-  };
-  defineExpose({
-    init,
-    resize,
-  });
+  const resize = () => {};
+
+  defineExpose({ init, resize });
 </script>
 
 <style lang="less" scoped>
   .facility-panel {
     display: flex;
+    flex-direction: column;
     gap: 16px;
     height: 100%;
     padding: 16px;
     background-color: #f0f2f5;
+    overflow-y: auto;
 
-    .panel-left {
-      flex: 2; // 约占 66%
+    .panel-block {
       background: #fff;
       border-radius: 4px;
       padding: 16px;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .panel-right {
-      flex: 1; // 约占 33%
-      background: #fff;
-      border-radius: 4px;
-      padding: 16px;
-      display: flex;
-      flex-direction: column;
     }
 
     .panel-header {
@@ -293,12 +204,6 @@
       }
     }
 
-    .panel-content {
-      flex: 1;
-      overflow: hidden;
-    }
-
-    // 排名徽章样式
     .rank-badge {
       width: 24px;
       height: 24px;
@@ -310,25 +215,15 @@
       font-size: 12px;
       font-weight: bold;
 
-      &.rank-1,
-      &.rank-2,
-      &.rank-3 {
-        background-color: #ffd700; // 金色/橙色
-      }
-
-      &.rank-blue {
-        background-color: #1890ff; // 蓝色
-      }
-
-      &.rank-red {
-        background-color: #ff4d4f; // 红色
-      }
+      &.rank-1 { background-color: #ff9a3c; }
+      &.rank-2 { background-color: #ffb800; }
+      &.rank-3 { background-color: #ffd700; }
+      &.rank-blue { background-color: #1890ff; }
     }
   }
 
-  // 深度选择器修改表格样式以匹配图片
   :deep(.ant-table-thead > tr > th) {
-    background-color: #5b6bd6 !important; // 紫色表头
+    background-color: #5b6bd6 !important;
     color: #fff !important;
     font-weight: 500;
   }
@@ -338,7 +233,7 @@
   }
 
   :deep(.ant-table-row:nth-child(even)) {
-    background-color: #fafafa; // 斑马纹
+    background-color: #fafafa;
   }
 
   .rate-success {

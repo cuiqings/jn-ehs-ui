@@ -65,6 +65,9 @@
             @change="handleTableChange"
           >
             <template #bodyCell="{ column, record }">
+              <template v-if="column.key === 'checkResult'">
+                <div>{{ record.checkResult || '-' }}</div>
+              </template>
               <template v-if="column.key === 'action'">
                 <a-space :size="24">
                   <!-- <a-button type="link" link @click="onView(record)">查看</a-button> -->
@@ -212,10 +215,13 @@
   import { getDangerousDataUn, getRiskWorkDataUn, getRiskWorkListUn, getDangerousDataNumUn, getWorkStatusDataUn, getDangerousDescUn } from './api';
   import workDetail from '../../hazardousOperation/detail/detailDaver.vue';
   import { CloudDownloadOutlined, FolderViewOutlined } from '@ant-design/icons-vue';
+  import { getFileAccessHttpUrl } from '/@/utils/common/compUtils';
+  import { createImgPreview } from '/@/components/Preview/index';
+  import { previewFile, downloadFileAll, getDepart3ListWithSecurity } from '/@/api/common/api';
+  import { JImageUpload } from '/@/components/Form';
   import { useContent } from './hooks/useContent';
   import LineBar from '../components/lineBar.vue';
   import dayjs from 'dayjs';
-  import { downloadFileAll, getDepart3ListWithSecurity } from '/@/api/common/api';
   import { useUserStore } from '/@/store/modules/user';
   const { workStatusList, departList, columnsUn, columns2Un, columns3Un, onView, onExportWork, register, downloading } = useContent();
 
@@ -415,6 +421,26 @@
     const fileName = '非高危作业统计' + dayjs(new Date()).format('YYYY年MM月DD日') + '.xlsx';
     downloadFileAll('/workFgwStatistics/getRiskWorkListExport', fileName, queryParams.value);
   };
+
+  // 预览转交附件（图片直接预览，PDF新窗口预览，Word/Excel直接下载）
+  const imgExts = ['png', 'jpg', 'jpeg', 'gif', 'bmp', 'webp'];
+  const pdfExts = ['pdf'];
+  function isImg(url: string) {
+    return imgExts.includes(url.split('.').pop()?.toLowerCase() || '');
+  }
+  function previewAnnex(url: string) {
+    const ext = url.split('.').pop()?.toLowerCase() || '';
+    const fullUrl = getFileAccessHttpUrl(url);
+    if (imgExts.includes(ext)) {
+      createImgPreview({ imageList: [fullUrl] });
+    } else if (pdfExts.includes(ext)) {
+      previewFile(url).then((res) => {
+        window.open(res, '_blank');
+      });
+    } else {
+      window.open(fullUrl, '_blank');
+    }
+  }
   // 表格1数据
   const tableLoading = ref(false);
   async function getRiskWorkListData() {

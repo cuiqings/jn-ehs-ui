@@ -113,39 +113,7 @@
           >
             <template #bodyCell="{ column, record }">
               <template v-if="column.key === 'checkResult'">
-                <div v-if="record.transfer !== '1'">未转交</div>
-                <div v-else>
-                  <div style="margin-bottom: 4px">
-                    <span style="color: #1890ff; font-weight: 600">(1)</span> 已转交
-                  </div>
-                  <div style="margin-bottom: 8px">
-                    <div><span style="color: #1890ff; font-weight: 600">(2)</span> 转交人</div>
-                    <div style="padding: 4px 0; color: #333">{{ record.assignName }}</div>
-                  </div>
-                  <div style="margin-bottom: 8px">
-                    <div><span style="color: #1890ff; font-weight: 600">(3)</span> 转交原因</div>
-                    <div style="padding: 4px 0; color: #333">{{ record.roleAssignRemark }}</div>
-                  </div>
-                  <div v-if="record.annex && record.annex.length">
-                    <div style="margin-bottom: 4px"><span style="color: #1890ff; font-weight: 600">(4)</span> 转交附件</div>
-                    <div style="display: flex; flex-wrap: wrap; gap: 8px">
-                      <template v-for="(url, idx) in record.annex" :key="idx">
-                        <JImageUpload
-                          v-if="isImg(url)"
-                          :value="url"
-                          disabled
-                          text=""
-                          bizPath="hiddenTrouble"
-                        />
-                        <span
-                          v-else
-                          style="color: #1890ff; cursor: pointer"
-                          @click="previewAnnex(url)"
-                        >{{ url.split('/').pop() }}</span>
-                      </template>
-                    </div>
-                  </div>
-                </div>
+                <div>{{ record.checkResult || '-' }}</div>
               </template>
               <template v-if="column.key === 'action'">
                 <a-space :size="24">
