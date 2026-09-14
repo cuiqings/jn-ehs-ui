@@ -26,12 +26,12 @@ export const useContent = () => {
     { departName: '二炼钢', orgCode: 'A04B01C05' },
     { departName: '棒材', orgCode: 'A04B01C07' },
     { departName: '热卷板', orgCode: 'A04B01C06' },
+    { departName: '宽厚板', orgCode: 'A04B02C01' },
     { departName: '原料', orgCode: 'A04B01C18' },
     { departName: '辅料', orgCode: 'A04B01C19' },
     { departName: '动力', orgCode: 'A04B01C10' },
     { departName: '维修', orgCode: 'A04B01C16' },
     { departName: '高品钢', orgCode: 'A04B01C08' },
-    { departName: '宽厚板', orgCode: 'A04B02C01' },
   ];
 
   const gradeList = [
