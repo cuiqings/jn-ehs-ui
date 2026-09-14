@@ -414,7 +414,7 @@ export const getWorkCheckList = (params) => {
 };
 // 删除安全作业检查记录
 export const deleteWorkCheck = (params) => {
-  return defHttp.post({ url: Api.deleteWorkCheck, params });
+  return defHttp.post({ url: Api.deleteWorkCheck, params }, { joinParamsToUrl: true });
 };
 export const queryFcUser = () => {
   return defHttp.get({ url: Api.queryFcUser });
