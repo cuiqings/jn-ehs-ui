@@ -3,7 +3,7 @@
     <div class="high-risk-panel">
       <div class="panel-card">
         <div class="card-header">
-          <div class="card-title">高危作业次数</div>
+          <div class="card-title">高危作业数量</div>
           <div class="card-icon">
             <Icon icon="ant-design:bar-chart-outlined" :size="30" color="#1890ff" />
           </div>
@@ -104,6 +104,54 @@
               </div>
               <div class="progress-wrapper">
                 <a-progress :percent="gwData.twoCjZrWorkRate" :show-info="false" stroke-color="#52c41a" :stroke-width="6" />
+              </div>
+            </div>
+          </div>
+          <div class="work-group">
+            <div class="group-title">三级高危({{ gwData.threeWork }}项)</div>
+            <div class="progress-item">
+              <div class="progress-header">
+                <div class="label">安全部</div>
+                <div class="value">检查完成率{{ gwData.threeWorkRate }}%</div>
+              </div>
+              <div class="progress-wrapper">
+                <a-progress :percent="gwData.threeWorkRate" :show-info="false" stroke-color="#52c41a" :stroke-width="6" />
+              </div>
+            </div>
+            <div class="progress-item">
+              <div class="progress-header">
+                <div class="label">副部长</div>
+                <div class="value">检查完成率{{ gwData.threeFbzWorkRate }}%</div>
+              </div>
+              <div class="progress-wrapper">
+                <a-progress :percent="gwData.threeFbzWorkRate" :show-info="false" stroke-color="#52c41a" :stroke-width="6" />
+              </div>
+            </div>
+            <div class="progress-item">
+              <div class="progress-header">
+                <div class="label">安全科长</div>
+                <div class="value">检查完成率{{ gwData.threeAqkzWorkRate }}%</div>
+              </div>
+              <div class="progress-wrapper">
+                <a-progress :percent="gwData.threeAqkzWorkRate" :show-info="false" stroke-color="#52c41a" :stroke-width="6" />
+              </div>
+            </div>
+            <div class="progress-item">
+              <div class="progress-header">
+                <div class="label">安全科</div>
+                <div class="value">检查完成率{{ gwData.threeAqkWorkRate }}%</div>
+              </div>
+              <div class="progress-wrapper">
+                <a-progress :percent="gwData.threeAqkWorkRate" :show-info="false" stroke-color="#52c41a" :stroke-width="6" />
+              </div>
+            </div>
+            <div class="progress-item">
+              <div class="progress-header">
+                <div class="label">车间主任</div>
+                <div class="value">检查完成率{{ gwData.threeCjZrWorkRate }}%</div>
+              </div>
+              <div class="progress-wrapper">
+                <a-progress :percent="gwData.threeCjZrWorkRate" :show-info="false" stroke-color="#52c41a" :stroke-width="6" />
               </div>
             </div>
           </div>
@@ -352,6 +400,31 @@
     display: flex;
     flex-direction: column;
     gap: 10px;
+    height: 600px;
+    overflow-y: auto;
+    padding-right: 4px;
+    
+    /* Firefox 滚动条 */
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0, 0, 0, 0.08) transparent;
+    
+    /* Chrome, Safari, Edge 滚动条 */
+    &::-webkit-scrollbar {
+      width: 4px;
+    }
+    
+    &::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    
+    &::-webkit-scrollbar-thumb {
+      background: rgba(0, 0, 0, 0.08);
+      border-radius: 2px;
+      
+      &:hover {
+        background: rgba(0, 0, 0, 0.15);
+      }
+    }
   }
 
   .work-group {

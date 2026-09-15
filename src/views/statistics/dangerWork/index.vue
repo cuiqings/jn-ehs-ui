@@ -551,7 +551,6 @@
   } from './api';
   import workDetail from '../../hazardousOperation/detail/detailDaver.vue';
   import { CloudDownloadOutlined, FolderViewOutlined } from '@ant-design/icons-vue';
-  import { JImageUpload } from '/@/components/Form';
   import { downloadFileAll, getDepart3ListWithSecurity } from '/@/api/common/api';
   import { getFileAccessHttpUrl } from '/@/utils/common/compUtils';
   import { createImgPreview } from '/@/components/Preview/index';
