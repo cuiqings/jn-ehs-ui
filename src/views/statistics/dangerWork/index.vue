@@ -225,7 +225,8 @@
                 <a-table-summary-cell :index="0">备注</a-table-summary-cell>
                 <a-table-summary-cell :col-span="21">
                   <a-typography-text type="danger">
-                    <div>{{ remark }}</div>
+                    <div v-if="remark">{{ remark }}</div>
+                    <div v-if="remarkShouldCheckNum">{{ remarkShouldCheckNum }}</div>
                   </a-typography-text>
                 </a-table-summary-cell>
               </a-table-summary-row>
@@ -300,7 +301,7 @@
             </template>
             <template v-if="column.key === 'aqkzCheckNumTwo'">
               <span :style="{ color: comparePercent(record.aqkzCheckRatioTwo, '60%') == -1 && record.aqkzShouldCheckNumTwo > 0 ? '#ff4d4f' : '' }">{{
-                record.aqkCheckNumTwo
+                record.aqkzCheckNumTwo
               }}</span>
             </template>
             <template v-if="column.key === 'aqkzCheckRatioTwo'">
@@ -308,7 +309,6 @@
                 record.aqkzShouldCheckNumTwo > 0 ? record.aqkzCheckRatioTwo : '-'
               }}</span>
             </template>
-
             <template v-if="column.key === 'cjZrShouldCheckNumTwo'">
               <span :style="{ color: comparePercent(record.cjZrCheckRatioTwo, '60%') == -1 && record.cjZrShouldCheckNumTwo > 0 ? '#ff4d4f' : '' }">{{
                 record.cjZrShouldCheckNumTwo
@@ -346,7 +346,8 @@
                 <a-table-summary-cell :index="0">备注</a-table-summary-cell>
                 <a-table-summary-cell :col-span="21">
                   <a-typography-text type="danger">
-                    <div>{{ remartTwo }}</div>
+                    <div v-if="remarkTwo">{{ remarkTwo }}</div>
+                    <div v-if="remarkTwoShouldCheckNum">{{ remarkTwoShouldCheckNum }}</div>
                   </a-typography-text>
                 </a-table-summary-cell>
               </a-table-summary-row>
@@ -479,7 +480,8 @@
                 <a-table-summary-cell :index="0">备注</a-table-summary-cell>
                 <a-table-summary-cell :col-span="21">
                   <a-typography-text type="danger">
-                    <div>{{ remartThree }}</div>
+                    <div v-if="remarkThree">{{ remarkThree }}</div>
+                    <div v-if="remarkThreeShouldCheckNum">{{ remarkThreeShouldCheckNum }}</div>
                   </a-typography-text>
                 </a-table-summary-cell>
               </a-table-summary-row>
@@ -1094,8 +1096,11 @@
   const desc3 = ref('');
 
   const remark = ref('');
-  const remartTwo = ref('');
-  const remartThree = ref('');
+  const remarkTwo = ref('');
+  const remarkThree = ref('');
+  const remarkShouldCheckNum = ref('');
+  const remarkTwoShouldCheckNum = ref('');
+  const remarkThreeShouldCheckNum = ref('');
   // 一级高危
   async function getData() {
     loading.value = true;
@@ -1106,7 +1111,8 @@
     }).finally(() => {
       loading.value = false;
     });
-    remark.value = res.remark;
+    remark.value = res.remark || '';
+    remarkShouldCheckNum.value = res.remarkShouldCheckNum || '';
     levelData1.value = res.list;
   }
   // 二级高危
@@ -1119,7 +1125,8 @@
     }).finally(() => {
       loading.value = false;
     });
-    remartTwo.value = res.remarkTwo;
+    remarkTwo.value = res.remarkTwo || '';
+    remarkTwoShouldCheckNum.value = res.remarkTwoShouldCheckNum || '';
     levelData2.value = res.list;
   }
   // 三级高危
@@ -1132,7 +1139,8 @@
     }).finally(() => {
       loading.value = false;
     });
-    remartThree.value = res.remarkThree;
+    remarkThree.value = res.remarkThree || '';
+    remarkThreeShouldCheckNum.value = res.remarkThreeShouldCheckNum || '';
     levelData3.value = res.list;
     console.log(levelData3.value,'22222');
   }

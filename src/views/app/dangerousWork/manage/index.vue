@@ -691,7 +691,10 @@
   getEduOrgList({level: 4}).then(async (res) => {
     applicantUnit.value = res;
     const orgCode = await defaultCompany();
-    queryParams.applicationUnit = removeApplicationUnitRoot(orgCode);
+    // 把申请单位的默认值给到生产/作业单位，申请单位自己清空
+    // 同样过滤掉敬业集团根节点
+    queryParams.workUnit = removeApplicationUnitRoot(orgCode);
+    queryParams.applicationUnit = undefined;
     getUser();
     pageInit();
   });
@@ -901,7 +904,8 @@
     if(params.applicationUnit && Array.isArray(params.applicationUnit)) {
       params.applicationUnit = params.applicationUnit.join(',')
     }
-    if (!params.applicationUnit && applicantUnit.value && applicantUnit.value.length) {
+    // 如果有 workUnit，就不自动填充 applicationUnit
+    if (!params.applicationUnit && !params.workUnit && applicantUnit.value && applicantUnit.value.length) {
       params.applicationUnit = applicantUnit.value[0].key;
     }
     if(params.workUnit && params.workUnit.length > 0) {
@@ -1183,7 +1187,10 @@
     queryParams.workApplyCode = '';
     queryParams.applicant = '';
     queryParams.applicantText = '';
-    queryParams.workUnit = [];
+    // 重置时恢复初始逻辑：申请单位清空，生产/作业单位设为默认值（过滤根节点）
+    defaultCompany().then(code => {
+      queryParams.workUnit = removeApplicationUnitRoot(code);
+    });
     if(applicantUnit.value.length == 1 && applicantUnit.value[0].children){
       queryParams.applicationUnit = undefined;
       queryParams.applicationUnitText = '';

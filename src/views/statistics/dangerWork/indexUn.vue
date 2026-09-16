@@ -152,8 +152,8 @@
                 <a-table-summary-cell :index="0">备注</a-table-summary-cell>
                 <a-table-summary-cell :col-span="15">
                   <a-typography-text type="danger">
-                    <div>{{ remark }}</div>
-                    <!-- <div>{{ remartTwo }}</div> -->
+                    <div v-if="remark">{{ remark }}</div>
+                    <div v-if="remarkShouldCheckNum">{{ remarkShouldCheckNum }}</div>
                   </a-typography-text>
                 </a-table-summary-cell>
               </a-table-summary-row>
@@ -573,7 +573,9 @@
   const desc2 = ref('');
 
   const remark = ref('');
+  const remarkShouldCheckNum = ref('');
   const remartTwo = ref('');
+  
   async function getData() {
     loading.value = true;
     let res = await getDangerousDataUn({
@@ -583,7 +585,8 @@
     }).finally(() => {
       loading.value = false;
     });
-    remark.value = res.remark;
+    remark.value = res.remark || '';
+    remarkShouldCheckNum.value = res.remarkShouldCheckNum || '';
     remartTwo.value = res.remarkTwo;
     data2.value = res.list;
   }
