@@ -5,43 +5,73 @@
         <template v-if="column.key === 'imgUrl'">
           <CheckImgView :record="record" />
         </template>
-        <template v-if="column.key === 'confirmResult'">
-          {{ record.confirmResult == '1' ? '合格' : record.confirmResult == '2' ? '不合格' : '' }}
-        </template>
-        <template v-if="column.key === 'zgimgUrl'">
-          <JImageUpload disabled v-model:value="record.zgimgUrl" />
+        <template v-if="column.key === 'result'">
+          <div>
+            <div v-if="record.result" style="margin-bottom: 4px">
+              <span style="color: #1890ff; font-weight: 600">(1)</span> {{ record.result }}
+            </div>
+            <div v-if="record.yhlb" style="margin-bottom: 4px">
+              <span style="color: #1890ff; font-weight: 600">(2)</span> 隐患类别：{{ record.yhlb }}
+            </div>
+            <div v-if="record.zgresult" style="margin-bottom: 4px">
+              <span style="color: #1890ff; font-weight: 600">(3)</span> 整改措施：{{ record.zgresult }}
+            </div>
+            <div v-if="record.zgimgUrl" style="margin-bottom: 8px">
+              <div style="margin-bottom: 4px">
+                <span style="color: #1890ff; font-weight: 600">(4)</span> 整改后照片：
+              </div>
+              <JImageUpload disabled v-model:value="record.zgimgUrl" />
+            </div>
+            <div v-if="record.headName" style="margin-bottom: 4px">
+              <span style="color: #1890ff; font-weight: 600">(5)</span> 整改人：{{ record.headName }}
+            </div>
+            <div v-if="record.reformTime" style="margin-bottom: 4px">
+              <span style="color: #1890ff; font-weight: 600">(6)</span> 整改时间：{{ record.reformTime }}
+            </div>
+            <div v-if="record.confirmResult" style="margin-bottom: 4px">
+              <span style="color: #1890ff; font-weight: 600">(7)</span> 整改确认：{{ record.confirmResult == '1' ? '合格' : record.confirmResult == '2' ? '不合格' : '' }}
+            </div>
+            <div v-if="record.confirmHeadName" style="margin-bottom: 4px">
+              <span style="color: #1890ff; font-weight: 600">(8)</span> 确认人：{{ record.confirmHeadName }}
+            </div>
+            <div v-if="record.confirmTime">
+              <span style="color: #1890ff; font-weight: 600">(9)</span> 确认时间：{{ record.confirmTime }}
+            </div>
+          </div>
         </template>
         <template v-if="column.key === 'transfer'">
-          <div v-if="record.transfer !== '1'">未转交</div>
-          <div v-else>
-            <div style="margin-bottom: 4px">
-              <span style="color: #1890ff; font-weight: 600">(1)</span> 已转交
-            </div>
-            <div style="margin-bottom: 8px">
-              <div><span style="color: #1890ff; font-weight: 600">(2)</span> 转交人:</div>
-              <div style="padding: 4px 0; color: #333">{{ record.assignName }}</div>
-            </div>
-            <div style="margin-bottom: 8px">
-              <div><span style="color: #1890ff; font-weight: 600">(3)</span> 转交原因:</div>
-              <div style="padding: 4px 0; color: #333">{{ record.roleAssignRemark }}</div>
-            </div>
-            <div v-if="record.annex && record.annex.length">
-              <div style="margin-bottom: 4px"><span style="color: #1890ff; font-weight: 600">(4)</span> 转交附件:</div>
-              <div style="display: flex; flex-wrap: wrap; gap: 8px">
-                <template v-for="(url, idx) in record.annex" :key="idx">
-                  <JImageUpload
-                    v-if="isImg(url)"
-                    :value="url"
-                    disabled
-                    text=""
-                    bizPath="hiddenTrouble"
-                  />
-                  <span
-                    v-else
-                    style="color: #1890ff; cursor: pointer"
-                    @click="previewAnnex(url)"
-                  >{{ url.split('/').pop() }}</span>
-                </template>
+          <div>
+            <div v-if="record.transfer !== '1'">未转交</div>
+            <div v-else>
+              <div style="margin-bottom: 4px">
+                <span style="color: #1890ff; font-weight: 600">(1)</span> 已转交
+              </div>
+              <div style="margin-bottom: 8px">
+                <div><span style="color: #1890ff; font-weight: 600">(2)</span> 转交人:</div>
+                <div style="padding: 4px 0; color: #333">{{ record.assignName }}</div>
+              </div>
+              <div style="margin-bottom: 8px">
+                <div><span style="color: #1890ff; font-weight: 600">(3)</span> 转交原因:</div>
+                <div style="padding: 4px 0; color: #333">{{ record.roleAssignRemark }}</div>
+              </div>
+              <div v-if="record.annex && record.annex.length">
+                <div style="margin-bottom: 4px"><span style="color: #1890ff; font-weight: 600">(4)</span> 转交附件:</div>
+                <div style="display: flex; flex-wrap: wrap; gap: 8px">
+                  <template v-for="(url, idx) in record.annex" :key="idx">
+                    <JImageUpload
+                      v-if="isImg(url)"
+                      :value="url"
+                      disabled
+                      text=""
+                      bizPath="hiddenTrouble"
+                    />
+                    <span
+                      v-else
+                      style="color: #1890ff; cursor: pointer"
+                      @click="previewAnnex(url)"
+                    >{{ url.split('/').pop() }}</span>
+                  </template>
+                </div>
               </div>
             </div>
           </div>
@@ -182,104 +212,43 @@
       title: '检查人',
       dataIndex: 'head',
       key: 'head',
-      width: 150,
-      scopedSlots: { customRender: 'head' },
+      width: 120,
     },
     {
       title: '检查层级',
       dataIndex: 'unitType',
       key: 'unitType',
-      width: 150,
-      scopedSlots: { customRender: 'unitType' },
+      width: 100,
     },
     {
       title: '检查时间',
       dataIndex: 'checkTime',
       key: 'checkTime',
-      width: 150,
-      scopedSlots: { customRender: 'checkTime' },
+      width: 160,
     },
     {
       title: '检查描述',
       dataIndex: 'remark',
       key: 'remark',
       width: 200,
-      scopedSlots: { customRender: 'remark' },
     },
     {
       title: '检查照片',
       dataIndex: 'imgUrl',
       key: 'imgUrl',
       width: 140,
-      scopedSlots: { customRender: 'imgUrl' },
     },
     {
       title: '检查结果',
       dataIndex: 'result',
       key: 'result',
-      width: 200,
-      scopedSlots: { customRender: 'result' },
+      width: 300,
     },
     {
       title: '是否转交权限',
       dataIndex: 'transfer',
       key: 'transfer',
       width: 260,
-      scopedSlots: { customRender: 'transfer' },
-    },
-    {
-      title: '隐患类别',
-      dataIndex: 'yhlb',
-      key: 'yhlb',
-      width: 190,
-    },
-    {
-      title: '整改措施',
-      dataIndex: 'zgresult',
-      key: 'zgresult',
-      width: 200,
-      scopedSlots: { customRender: 'result' },
-    },
-    {
-      title: '整改后照片',
-      dataIndex: 'zgimgUrl',
-      key: 'zgimgUrl',
-      width: 140,
-      scopedSlots: { customRender: 'zgimgUrl' },
-    },
-    {
-      title: '整改人',
-      dataIndex: 'headName',
-      key: 'headName',
-      width: 200,
-      scopedSlots: { customRender: 'result' },
-    },
-    {
-      title: '整改时间',
-      dataIndex: 'reformTime',
-      key: 'reformTime',
-      width: 200,
-    },
-    {
-      title: '整改确认',
-      dataIndex: 'confirmResult',
-      key: 'confirmResult',
-      width: 200,
-      scopedSlots: { customRender: 'result' },
-    },
-    {
-      title: '确认人',
-      dataIndex: 'confirmHeadName',
-      key: 'confirmHeadName',
-      width: 200,
-      scopedSlots: { customRender: 'result' },
-    },
-    {
-      title: '确认时间',
-      dataIndex: 'confirmTime',
-      key: 'confirmTime',
-      width: 200,
-      scopedSlots: { customRender: 'result' },
     },
   ];
 
@@ -363,7 +332,8 @@
       }
     });
     columns.forEach((column: any, cindex) => {
-      if (cindex <= 4) {
+      // 前7列（检查人~是否转交权限）需要行合并
+      if (cindex <= 6) {
         column['customCell'] = (row, rindex) => {
           let obj = { rowSpan: 1 };
           columnSplit.forEach((num, idx) => {
@@ -427,5 +397,10 @@
 
 :deep(.ant-table-thead > tr > th) {
   background: #fafafa;
+  text-align: left;
+}
+
+:deep(.ant-table-tbody > tr > td) {
+  vertical-align: middle;
 }
 </style>

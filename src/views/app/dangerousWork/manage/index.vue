@@ -622,7 +622,7 @@
     const root = applicantUnit.value[0];
     return root?.title === '敬业集团' && Array.isArray(root.children) ? root : undefined;
   });
-  // 申请单位筛选从集团下一级开始展示，生产/作业单位仍使用完整机构树。
+  // 申请单位筛选从集团下一级开始展示，生产/作业单位使用完整机构树。
   const applicationUnitOptions = computed(() => applicationUnitRoot.value?.children || applicantUnit.value);
 
   const removeApplicationUnitRoot = (values?: Array<string>) => {
@@ -691,10 +691,8 @@
   getEduOrgList({level: 4}).then(async (res) => {
     applicantUnit.value = res;
     const orgCode = await defaultCompany();
-    // 把申请单位的默认值给到生产/作业单位，申请单位自己清空
-    // 同样过滤掉敬业集团根节点
-    queryParams.workUnit = removeApplicationUnitRoot(orgCode);
-    queryParams.applicationUnit = undefined;
+    queryParams.applicationUnit = removeApplicationUnitRoot(orgCode);
+    queryParams.workUnit = undefined;
     getUser();
     pageInit();
   });
@@ -1187,12 +1185,12 @@
     queryParams.workApplyCode = '';
     queryParams.applicant = '';
     queryParams.applicantText = '';
-    // 重置时恢复初始逻辑：申请单位清空，生产/作业单位设为默认值（过滤根节点）
+    // 重置时恢复初始逻辑：生产/作业单位清空，申请单位设为默认值（过滤根节点）
     defaultCompany().then(code => {
-      queryParams.workUnit = removeApplicationUnitRoot(code);
+      queryParams.applicationUnit = removeApplicationUnitRoot(code);
     });
     if(applicantUnit.value.length == 1 && applicantUnit.value[0].children){
-      queryParams.applicationUnit = undefined;
+      queryParams.workUnit = undefined;
       queryParams.applicationUnitText = '';
     }
     queryParams.startTime = '';
