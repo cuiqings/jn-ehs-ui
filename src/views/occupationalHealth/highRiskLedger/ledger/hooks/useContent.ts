@@ -341,5 +341,6 @@ export const useContent = () => {
     registerCheckModal,
     registerCheckIn,
     checkInOpen,
+    queryParams,
   };
 };

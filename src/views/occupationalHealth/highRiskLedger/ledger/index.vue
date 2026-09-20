@@ -19,6 +19,9 @@
         <a-button type="primary" v-auth="'highRiskLedger:ledger:temp'" preIcon="ant-design:download-outlined" @click="onExportTemplateXls"
           >导入模板下载</a-button
         >
+        <a-button type="primary" v-auth="'highRiskLedger:ledger:export'" preIcon="ant-design:export-outlined" @click="onExportData"
+          >导出</a-button
+        >
         <!-- <a-button
           type="primary"
           v-auth="'highRiskLedger:ledger:export'"
@@ -83,6 +86,8 @@
     rowSelection,
     selectedRowKeys,
     batchDel,
+    queryParams,
+    getForm,
   } = useContent();
 
   const submitSuccess = () => {
@@ -94,6 +99,19 @@
     const { handleExportXls } = useMethods();
     let params = {};
     handleExportXls('高危人员台账模板', '/riskPersonTent/downloadTemplate', params);
+  }
+
+  //导出高危人员台账
+  function onExportData() {
+    const { handleExportXls } = useMethods();
+    const formValues = getForm().getFieldsValue() as any;
+    const params = {
+      status: formValues.status ?? '',
+      disease: formValues.disease ?? '',
+      orgCode: formValues.orgCode ?? '',
+      userName: formValues.userName ?? '',
+    };
+    handleExportXls(dayjs(new Date()).format('YYYYMMDD') + '高危人员台账', '/riskPersonTent/export', params);
   }
   const loading = ref(false);
   function downloadZip() {

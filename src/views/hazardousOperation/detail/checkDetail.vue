@@ -236,7 +236,7 @@
       title: '检查照片',
       dataIndex: 'imgUrl',
       key: 'imgUrl',
-      width: 140,
+      width: 360,
     },
     {
       title: '检查结果',
@@ -398,6 +398,7 @@
 :deep(.ant-table-thead > tr > th) {
   background: #fafafa;
   text-align: left;
+  white-space: nowrap;
 }
 
 :deep(.ant-table-tbody > tr > td) {
