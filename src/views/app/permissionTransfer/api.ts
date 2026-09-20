@@ -6,6 +6,7 @@ enum Api {
   revoke = '/system/sysRoleAssign/cancel',
   receiverList = '/system/sysRoleAssign/findReceiverList',
   findRoleList = '/system/sysRoleAssign/findRoleList',
+  sysRoleList = '/sys/role/list',
 }
 
 /**
@@ -41,4 +42,11 @@ export const getReceiverList = (params) => {
  */
 export const getUserRoleList = (params) => {
   return defHttp.get({ url: Api.findRoleList, params });
+};
+
+/**
+ * 获取系统角色列表（用于筛选下拉）
+ */
+export const getSysRoleList = (params?) => {
+  return defHttp.get({ url: Api.sysRoleList, params });
 };
