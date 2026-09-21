@@ -160,6 +160,63 @@
           </div>
         </div>
 
+        <!-- 转交状态 -->
+        <div class="filter-section">
+          <div class="filter-label">转交状态</div>
+          <div class="toggle-wrap status-wrap">
+            <span :class="['toggle-item', filterParams.status === '' ? 'active' : '']" @click="filterParams.status = ''">全部</span>
+            <span :class="['toggle-item', filterParams.status === '1' ? 'active' : '']" @click="filterParams.status = '1'">进行中</span>
+            <span :class="['toggle-item', filterParams.status === '2' ? 'active' : '']" @click="filterParams.status = '2'">已完成</span>
+            <span :class="['toggle-item', filterParams.status === '3' ? 'active' : '']" @click="filterParams.status = '3'">已撤销</span>
+          </div>
+        </div>
+
+        <!-- 接收人部门 -->
+        <div class="filter-section">
+          <div class="filter-label">接收人部门</div>
+          <!-- 可输入的触发行，输入时直接展开下拉并搜索 -->
+          <div class="role-input-wrap">
+            <van-icon name="search" size="15" color="#c8c9cc" />
+            <input
+              ref="orgInputRef"
+              class="role-input-field"
+              v-model="orgSearchVal"
+              :placeholder="filterParams.receiverOrgName || '搜索部门名称'"
+              @input="onOrgInputChange"
+              @focus="onOrgInputFocus"
+            />
+            <van-icon
+              v-if="filterParams.receiverOrgName || orgSearchVal"
+              name="clear"
+              size="16"
+              color="#c8c9cc"
+              @click.stop="onOrgClear"
+            />
+            <van-icon v-else :name="orgDropdownShow ? 'arrow-up' : 'arrow-down'" size="14" color="#c8c9cc" @click.stop="toggleOrgDropdown" />
+          </div>
+          <!-- 下拉列表 -->
+          <div v-if="orgDropdownShow" class="org-dropdown">
+            <div class="org-dropdown__list">
+              <div v-if="orgLoading" class="org-dropdown__loading">
+                <van-loading size="18px" color="#1989fa" />
+              </div>
+              <template v-else>
+                <div
+                  v-for="item in orgList"
+                  :key="item.orgCode"
+                  class="org-dropdown__item"
+                  :class="{ 'is-selected': filterParams.receiverOrgName === item.departName }"
+                  @click="onOrgSelect(item)"
+                >
+                  <span v-html="highlightOrg(item.departName)"></span>
+                  <van-icon v-if="filterParams.receiverOrgName === item.departName" name="success" color="#1989fa" size="14" />
+                </div>
+                <div v-if="orgList.length === 0" class="org-dropdown__empty">未找到匹配部门</div>
+              </template>
+            </div>
+          </div>
+        </div>
+
         <!-- 转交角色（内联下拉） -->
         <div class="filter-section">
           <div class="filter-label">转交角色</div>
@@ -230,7 +287,7 @@
 </template>
 
 <script setup lang="ts">
-  import { ref, reactive, computed, watch, nextTick, onMounted } from 'vue';
+  import { ref, reactive, computed, watch, nextTick, onMounted, onUnmounted } from 'vue';
   import { showConfirmDialog, showToast, showSuccessToast } from 'vant';
   import { useUserStore } from '/@/store/modules/user';
   import UserPicker from './components/UserPicker.vue';
@@ -238,6 +295,7 @@
   import { getTransferList, addTransfer, revokeTransfer, getUserRoleList, getSysRoleList } from './api';
   import { dateFormat } from '/@/utils/common/compUtils';
   import dayjs from 'dayjs';
+  import { get3DepartList } from '/@/api/common/api';
 
   const userStore = useUserStore();
   const activeTab = ref(0);
@@ -365,7 +423,9 @@
           params.endDate = filterParams.endDate;
         }
         params.isMy = filterParams.isMy;
+        if (filterParams.status) params.status = filterParams.status;
         if (filterParams.roleName) params.roleName = filterParams.roleName;
+        if (filterParams.receiverOrgCode) params.receiverOrgCode = filterParams.receiverOrgCode;
       }
       const res = await getTransferList(params);
       const records = res?.records || [];
@@ -425,7 +485,10 @@
     startDate: '',
     endDate: '',
     isMy: '1',
+    status: '',
     roleName: '',
+    receiverOrgCode: '',
+    receiverOrgName: '',
   });
 
   const onFilterCalendarConfirm = (e: Date[]) => {
@@ -438,7 +501,10 @@
     filterParams.startDate = '';
     filterParams.endDate = '';
     filterParams.isMy = '1';
+    filterParams.status = '';
     filterParams.roleName = '';
+    filterParams.receiverOrgCode = '';
+    filterParams.receiverOrgName = '';
     filterPopupShow.value = false;
     onRefreshHistory();
   };
@@ -446,6 +512,84 @@
   const onFilterSearch = () => {
     filterPopupShow.value = false;
     onRefreshHistory();
+  };
+
+  // ─── 部门选择器（内联下拉） ───────────────────────────────────
+  const orgDropdownShow = ref(false);
+  const orgLoading = ref(false);
+  const orgList = ref<any[]>([]);
+  const orgSearchVal = ref('');
+  const orgInputRef = ref<HTMLInputElement | null>(null);
+  let orgDebounceTimer: ReturnType<typeof setTimeout> | null = null;
+
+  const loadOrgList = async (keyword?: string) => {
+    orgLoading.value = true;
+    try {
+      const res = await get3DepartList();
+      // 数据应该已经是数组格式
+      let allOrgs = (res || []).map((item: any) => ({
+        departName: item.departName || item.name || item.label,
+        orgCode: item.orgCode || item.code || item.value,
+      }));
+      // 如果有搜索关键词，进行过滤
+      if (keyword) {
+        allOrgs = allOrgs.filter((org: any) => org.departName.includes(keyword));
+      }
+      orgList.value = allOrgs;
+    } catch (e) {
+      orgList.value = [];
+    } finally {
+      orgLoading.value = false;
+    }
+  };
+
+  // 点击箭头图标：收起/展开
+  const toggleOrgDropdown = () => {
+    if (orgDropdownShow.value) {
+      orgDropdownShow.value = false;
+    } else {
+      orgDropdownShow.value = true;
+      loadOrgList(orgSearchVal.value || undefined);
+      nextTick(() => orgInputRef.value?.focus());
+    }
+  };
+
+  // 输入框获得焦点时展开
+  const onOrgInputFocus = () => {
+    if (!orgDropdownShow.value) {
+      orgDropdownShow.value = true;
+      loadOrgList(orgSearchVal.value || undefined);
+    }
+  };
+
+  // 输入框内容变化：防抖搜索
+  const onOrgInputChange = () => {
+    orgDropdownShow.value = true;
+    if (orgDebounceTimer) clearTimeout(orgDebounceTimer);
+    orgDebounceTimer = setTimeout(() => {
+      loadOrgList(orgSearchVal.value || undefined);
+    }, 300);
+  };
+
+  const highlightOrg = (text: string) => {
+    const kw = orgSearchVal.value.trim();
+    if (!kw || !text) return text;
+    const escaped = kw.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    return text.replace(new RegExp(`(${escaped})`, 'gi'), '<mark>$1</mark>');
+  };
+
+  const onOrgSelect = (item: any) => {
+    filterParams.receiverOrgCode = item.orgCode;
+    filterParams.receiverOrgName = item.departName;
+    orgSearchVal.value = '';
+    orgDropdownShow.value = false;
+  };
+
+  const onOrgClear = () => {
+    filterParams.receiverOrgCode = '';
+    filterParams.receiverOrgName = '';
+    orgSearchVal.value = '';
+    orgDropdownShow.value = false;
   };
 
   // ─── 角色选择器（内联下拉） ───────────────────────────────────
@@ -456,11 +600,22 @@
   const roleInputRef = ref<HTMLInputElement | null>(null);
   let roleDebounceTimer: ReturnType<typeof setTimeout> | null = null;
 
+  // 允许的角色列表
+  const allowedRoleNames = [
+    '安全作业检查-安全部',
+    '安全作业检查-安全科',
+    '安全作业检查-安全科长',
+    '危险作业检查-车间主任',
+    '危险作业检查-安全副部长',
+  ];
+
   const loadRoleList = async (keyword?: string) => {
     roleLoading.value = true;
     try {
       const res = await getSysRoleList({ roleName: keyword ?? '', pageSize: 100, pageNo: 1 });
-      roleList.value = res?.records || [];
+      const allRecords = res?.records || [];
+      // 过滤出允许的角色
+      roleList.value = allRecords.filter((role: any) => allowedRoleNames.includes(role.roleName));
     } catch (e) {
       roleList.value = [];
     } finally {
@@ -518,34 +673,81 @@
     roleDropdownShow.value = false;
   };
 
-  // 筛选面板打开时预加载角色列表
+  // 筛选面板打开时预加载角色列表和部门列表
   watch(filterPopupShow, (val) => {
     if (val && roleList.value.length === 0) {
       loadRoleList();
     }
+    if (val && orgList.value.length === 0) {
+      loadOrgList();
+    }
     if (!val) {
       // 面板关闭时收起下拉
       roleDropdownShow.value = false;
+      orgDropdownShow.value = false;
     }
   });
 
-  onMounted(() => {});
+  // 点击外部区域关闭下拉
+  const handleClickOutside = (event: MouseEvent) => {
+    const target = event.target as HTMLElement;
+    
+    // 检查是否点击了角色下拉相关区域
+    const roleInputWrap = roleInputRef.value?.parentElement;
+    const roleDropdown = document.querySelector('.role-dropdown');
+    const isClickRoleArea = roleInputWrap?.contains(target) || roleDropdown?.contains(target);
+    
+    if (!isClickRoleArea && roleDropdownShow.value) {
+      roleDropdownShow.value = false;
+    }
+    
+    // 检查是否点击了部门下拉相关区域
+    const orgInputWrap = orgInputRef.value?.parentElement;
+    const orgDropdown = document.querySelector('.org-dropdown');
+    const isClickOrgArea = orgInputWrap?.contains(target) || orgDropdown?.contains(target);
+    
+    if (!isClickOrgArea && orgDropdownShow.value) {
+      orgDropdownShow.value = false;
+    }
+  };
+
+  onMounted(() => {
+    document.addEventListener('click', handleClickOutside);
+  });
+
+  onUnmounted(() => {
+    document.removeEventListener('click', handleClickOutside);
+  });
 </script>
 
 <style scoped lang="less">
 .permission-transfer {
   background-color: #f7f8fa;
-  min-height: 100vh;
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
 
   :deep(.van-field__label) {
     display: none;
+  }
+
+  :deep(.van-tabs) {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  :deep(.van-tabs__content) {
+    flex: 1;
+    overflow-y: auto;
   }
 }
 
 .tab-body {
   padding: 12px;
   background-color: #f7f8fa;
-  min-height: 100vh;
   padding-bottom: 80px;
 }
 
@@ -732,6 +934,16 @@
       font-weight: 500;
     }
   }
+
+  &.status-wrap {
+    flex-wrap: wrap;
+    
+    .toggle-item {
+      flex: 0 0 calc(50% - 4px);
+      text-align: center;
+      padding: 6px 8px;
+    }
+  }
 }
 
 // ─── 角色内联下拉 ─────────────────────────────────────────────
@@ -760,7 +972,8 @@
   }
 }
 
-.role-dropdown {
+.role-dropdown,
+.org-dropdown {
   margin-top: 4px;
   background: #fff;
   border-radius: 6px;
