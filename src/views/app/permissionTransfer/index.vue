@@ -220,25 +220,20 @@
         <!-- 转交角色（内联下拉） -->
         <div class="filter-section">
           <div class="filter-label">转交角色</div>
-          <!-- 可输入的触发行，输入时直接展开下拉并搜索 -->
-          <div class="role-input-wrap">
+          <!-- 只读触发行，点击展开下拉 -->
+          <div class="role-input-wrap" @click="toggleRoleDropdown">
             <van-icon name="search" size="15" color="#c8c9cc" />
-            <input
-              ref="roleInputRef"
-              class="role-input-field"
-              v-model="roleSearchVal"
-              :placeholder="filterParams.roleName || '搜索角色名称'"
-              @input="onRoleInputChange"
-              @focus="onRoleInputFocus"
-            />
+            <div class="role-input-field readonly-field">
+              {{ filterParams.roleName || '请选择转交角色' }}
+            </div>
             <van-icon
-              v-if="filterParams.roleName || roleSearchVal"
+              v-if="filterParams.roleName"
               name="clear"
               size="16"
               color="#c8c9cc"
               @click.stop="onRoleClear"
             />
-            <van-icon v-else :name="roleDropdownShow ? 'arrow-up' : 'arrow-down'" size="14" color="#c8c9cc" @click.stop="toggleRoleDropdown" />
+            <van-icon v-else :name="roleDropdownShow ? 'arrow-up' : 'arrow-down'" size="14" color="#c8c9cc" />
           </div>
           <!-- 下拉列表 -->
           <div v-if="roleDropdownShow" class="role-dropdown">
@@ -254,7 +249,7 @@
                   :class="{ 'is-selected': filterParams.roleName === item.roleName }"
                   @click="onRoleSelect(item)"
                 >
-                  <span v-html="highlightRole(item.roleName)"></span>
+                  <span>{{ item.roleName }}</span>
                   <van-icon v-if="filterParams.roleName === item.roleName" name="success" color="#1989fa" size="14" />
                 </div>
                 <div v-if="roleList.length === 0" class="role-dropdown__empty">未找到匹配角色</div>
@@ -592,13 +587,18 @@
     orgDropdownShow.value = false;
   };
 
+  // 部门下拉关闭时，如果有搜索内容但没有选择，清空搜索内容
+  watch(orgDropdownShow, (newVal) => {
+    if (!newVal && orgSearchVal.value && !filterParams.receiverOrgName) {
+      // 下拉关闭，有搜索内容但没选择项，清空搜索框
+      orgSearchVal.value = '';
+    }
+  });
+
   // ─── 角色选择器（内联下拉） ───────────────────────────────────
   const roleDropdownShow = ref(false);
   const roleLoading = ref(false);
   const roleList = ref<any[]>([]);
-  const roleSearchVal = ref('');
-  const roleInputRef = ref<HTMLInputElement | null>(null);
-  let roleDebounceTimer: ReturnType<typeof setTimeout> | null = null;
 
   // 允许的角色列表
   const allowedRoleNames = [
@@ -609,10 +609,10 @@
     '危险作业检查-安全副部长',
   ];
 
-  const loadRoleList = async (keyword?: string) => {
+  const loadRoleList = async () => {
     roleLoading.value = true;
     try {
-      const res = await getSysRoleList({ roleName: keyword ?? '', pageSize: 100, pageNo: 1 });
+      const res = await getSysRoleList({ roleName: '', pageSize: 100, pageNo: 1 });
       const allRecords = res?.records || [];
       // 过滤出允许的角色
       roleList.value = allRecords.filter((role: any) => allowedRoleNames.includes(role.roleName));
@@ -623,53 +623,25 @@
     }
   };
 
-  // 点击箭头图标：收起/展开
+  // 点击整行：收起/展开
   const toggleRoleDropdown = () => {
     if (roleDropdownShow.value) {
       roleDropdownShow.value = false;
     } else {
       roleDropdownShow.value = true;
-      loadRoleList(roleSearchVal.value || undefined);
-      nextTick(() => roleInputRef.value?.focus());
+      if (roleList.value.length === 0) {
+        loadRoleList();
+      }
     }
-  };
-
-  // 输入框获得焦点时展开
-  const onRoleInputFocus = () => {
-    if (!roleDropdownShow.value) {
-      roleDropdownShow.value = true;
-      loadRoleList(roleSearchVal.value || undefined);
-    }
-  };
-
-  // 输入框内容变化：防抖搜索
-  const onRoleInputChange = () => {
-    roleDropdownShow.value = true;
-    if (roleDebounceTimer) clearTimeout(roleDebounceTimer);
-    roleDebounceTimer = setTimeout(() => {
-      loadRoleList(roleSearchVal.value || undefined);
-    }, 300);
-  };
-
-  // 兼容旧引用（已无单独搜索框，保留空函数避免报错）
-  const onRoleSearch = onRoleInputChange;
-
-  const highlightRole = (text: string) => {
-    const kw = roleSearchVal.value.trim();
-    if (!kw || !text) return text;
-    const escaped = kw.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    return text.replace(new RegExp(`(${escaped})`, 'gi'), '<mark>$1</mark>');
   };
 
   const onRoleSelect = (item: any) => {
     filterParams.roleName = item.roleName;
-    roleSearchVal.value = '';
     roleDropdownShow.value = false;
   };
 
   const onRoleClear = () => {
     filterParams.roleName = '';
-    roleSearchVal.value = '';
     roleDropdownShow.value = false;
   };
 
@@ -693,8 +665,16 @@
     const target = event.target as HTMLElement;
     
     // 检查是否点击了角色下拉相关区域
-    const roleInputWrap = roleInputRef.value?.parentElement;
-    const roleDropdown = document.querySelector('.role-dropdown');
+    const roleSections = document.querySelectorAll('.filter-section');
+    let roleSection: Element | null = null;
+    roleSections.forEach((section) => {
+      const label = section.querySelector('.filter-label');
+      if (label?.textContent?.includes('转交角色')) {
+        roleSection = section;
+      }
+    });
+    const roleInputWrap = roleSection?.querySelector('.role-input-wrap');
+    const roleDropdown = roleSection?.querySelector('.role-dropdown');
     const isClickRoleArea = roleInputWrap?.contains(target) || roleDropdown?.contains(target);
     
     if (!isClickRoleArea && roleDropdownShow.value) {
@@ -702,8 +682,15 @@
     }
     
     // 检查是否点击了部门下拉相关区域
-    const orgInputWrap = orgInputRef.value?.parentElement;
-    const orgDropdown = document.querySelector('.org-dropdown');
+    let orgSection: Element | null = null;
+    roleSections.forEach((section) => {
+      const label = section.querySelector('.filter-label');
+      if (label?.textContent?.includes('接收人部门')) {
+        orgSection = section;
+      }
+    });
+    const orgInputWrap = orgSection?.querySelector('.role-input-wrap');
+    const orgDropdown = orgSection?.querySelector('.org-dropdown');
     const isClickOrgArea = orgInputWrap?.contains(target) || orgDropdown?.contains(target);
     
     if (!isClickOrgArea && orgDropdownShow.value) {
@@ -955,7 +942,7 @@
   padding: 0 10px;
   height: 38px;
   gap: 6px;
-  cursor: text;
+  cursor: pointer;
 
   .role-input-field {
     flex: 1;
@@ -968,6 +955,16 @@
 
     &::placeholder {
       color: #c8c9cc;
+    }
+
+    &.readonly-field {
+      color: #323233;
+      cursor: pointer;
+      
+      &:empty::before {
+        content: attr(placeholder);
+        color: #c8c9cc;
+      }
     }
   }
 }
