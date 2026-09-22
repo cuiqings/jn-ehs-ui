@@ -119,33 +119,7 @@
           />
         </a-form-item>
       </a-col>
-      <a-col :span="12" v-if="['1', '3', '4'].includes(formData.workType as string)">
-        <a-form-item label="作业等级" :colon="false" name="workGrade">
-          <a-select
-            :disabled="readonly || ['1', '4'].includes(formData.workType as string)"
-            v-model:value="formData.workGrade"
-            :options="workGradeList[formData.workType]"
-            :field-names="{ label: 'label', value: 'value' }"
-            placeholder="请选择"
-            @change="changeWorkGrade"
-          />
-        </a-form-item>
-      </a-col>
-      <a-col :span="12" v-if="formData.workType == '2'">
-        <a-form-item label="所属单位" :colon="false" name="affiliation">
-          <a-tree-select
-            :disabled="readonly"
-            v-model:value="formData.affiliation"
-            placeholder="请选择"
-            :tree-data="applicationUnitList"
-            showSearch
-            tree-node-filter-prop="title"
-            @change="affiliationChange"
-            :field-names="{ label: 'title', value: 'key', children: 'children' }"
-          />
-        </a-form-item>
-      </a-col>
-      <a-col :span="12" v-if="!unhazardousWork">
+      <a-col :span="12" v-if="!unhazardousWork && formData.workType != '10'">
         <a-form-item label="作业单位" :colon="false" name="workUnit">
           <a-tree-select
             :disabled="readonly"
@@ -156,6 +130,31 @@
             @change="workUnitChange"
             tree-node-filter-prop="title"
             :field-names="{ label: 'title', value: 'key', children: 'children' }"
+          />
+        </a-form-item>
+      </a-col>
+      <a-col :span="12" v-if="!unhazardousWork && formData.workType == '10'">
+        <a-form-item label="作业电压(kV)" :colon="false" name="operatingVoltageKv">
+          <a-input-number
+            style="width: 100%"
+            placeholder="请输入电压值"
+            :min="0"
+            :disabled="readonly"
+            v-model:value="formData.operatingVoltageKv"
+            @change="voltageChange"
+            @update:value="voltageChange"
+          />
+        </a-form-item>
+      </a-col>
+      <a-col :span="12" v-if="['1', '3', '4', '10'].includes(formData.workType as string)">
+        <a-form-item label="作业等级" :colon="false" name="workGrade">
+          <a-select
+            :disabled="readonly || ['1', '4', '10'].includes(formData.workType as string)"
+            v-model:value="formData.workGrade"
+            :options="formData.workType === '10' ? levelList : workGradeList[formData.workType]"
+            :field-names="{ label: 'label', value: 'value' }"
+            placeholder="请选择"
+            @change="changeWorkGrade"
           />
         </a-form-item>
       </a-col>
@@ -691,8 +690,7 @@
     }
     if (formData.value.workType) {
       workTypeChange(formData.value.workType);
-    }
-    loading.value = false;
+    }    loading.value = false;
     if (formData.value.id) {
       getSecurityByType();
     }
@@ -704,6 +702,9 @@
     }
     if (formData.value.workType == '1' && formData.value.workHeight) {
       workHeightChange(formData.value.workHeight);
+    }
+    if (formData.value.workType == '10' && formData.value.operatingVoltageKv !== undefined) {
+      voltageChange(formData.value.operatingVoltageKv);
     }
     if (prop.initType == 'copy') {
       formData.value.applicant = userStore.getUserInfo.id;
@@ -751,6 +752,18 @@
       formData.value.possibleDangerInput = '';
       formData.value.operatorName = '';
       formData.value.operator = '';
+      // 切换作业类型时清空电压字段和高危等级
+      formData.value.operatingVoltageKv = undefined;
+      if (value !== '10') {
+        formData.value.highWorkLevel = undefined;
+      }    }
+    // 电气作业时 operatingVoltageKv 必填，其他作业类型不校验
+    if (value === '10') {
+      formRules.value.operatingVoltageKv = [{ required: true, message: '请输入作业电压！', trigger: 'change' }];
+      delete formRules.value.workUnit;
+    } else {
+      delete formRules.value.operatingVoltageKv;
+      formRules.value.workUnit = [{ required: true, message: '请选择作业车间！', trigger: 'change' }];
     }
     if (formData.value.workType == '2' && formData.value.affiliation) {
       getLimitSpaceFn(formData.value.affiliation);
@@ -760,6 +773,23 @@
   function changeWorkGrade(value) {
     formRules.value.start = [workTimeValidation(formData.value.workType as string, value)];
   }
+
+  // 电气作业电压变化 → 自动计算高危作业等级
+  const voltageChange = (val: number | null) => {
+    if (val === null || val === undefined) return;
+    let grade = '';
+    if (val >= 110) {
+      grade = '一级';
+    } else if (val >= 35) {
+      grade = '二级';
+    } else if (val >= 1) {
+      grade = '三级';
+    } else {
+      // <1kV 低压，对应一级
+      grade = '一级';
+    }
+    formData.value.workGrade = grade;
+  };
   function affiliationChange() {
     if (formData.value.workType == '2' && formData.value.affiliation) {
       getLimitSpaceFn(formData.value.affiliation);

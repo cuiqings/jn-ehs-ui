@@ -142,6 +142,7 @@ export const limitedSpaceFormValidation = () => ({
   powerPoint: [{ required: true, message: '请输入！', trigger: 'change' }],
   consumerInfo: [{ required: true, message: '请输入！', trigger: 'change' }],
   operatingVoltage: [{ required: true, message: '请输入！', trigger: 'change' }],
+  operatingVoltageKv: [{ required: true, message: '请输入作业电压！', trigger: 'change' }],
   postWorker: [{ required: true, message: '请选择！', trigger: 'change' }],
   protectiveEquipmentIds: [{ required: true, message: '请选择！', trigger: 'change' }],
   procedureIds: [{ required: true, message: '请选择！', trigger: 'change' }],
