@@ -218,6 +218,16 @@
                 record.cjZrShouldCheckNum > 0 && record.cjZrCheckRatio ? record.cjZrCheckRatio : '-'
               }}</span>
             </template>
+            <template v-if="column.key === 'bzzCheckNum'">
+              <span :style="{ color: comparePercent(record.bzzCheckRatio, '100%') == -1 && record.shouldCheckNum > 0 ? '#ff4d4f' : '' }">{{
+                record.bzzCheckNum
+              }}</span>
+            </template>
+            <template v-if="column.key === 'bzzCheckRatio'">
+              <span :style="{ color: comparePercent(record.bzzCheckRatio, '100%') == -1 && record.shouldCheckNum > 0 ? '#ff4d4f' : '' }">{{
+                record.shouldCheckNum > 0 ? record.bzzCheckRatio : '-'
+              }}</span>
+            </template>
           </template>
           <template #summary>
             <a-table-summary fixed>
