@@ -73,6 +73,18 @@
           />
           <van-field
             required
+            v-if="formData.workType == '10'"
+            label="作业电压(kV)"
+            type="number"
+            @input="voltageChange"
+            input-align="right"
+            name="operatingVoltageKv"
+            placeholder="请输入"
+            :rules="[{ required: true, message: '请输入作业电压！' }]"
+            v-model="formData.operatingVoltageKv"
+          />
+          <van-field
+            required
             v-if="formData.workType == '4'"
             label=" 起吊物重量(t)"
             placeholder="请输入"
@@ -86,11 +98,11 @@
             @input="hoistingWeightChange"
           />
           <van-field
-            v-if="['1', '3', '4'].includes(formData.workType as string)"
+            v-if="['1', '3', '4', '10'].includes(formData.workType as string)"
             v-model="formData.workGrade"
             required
             readonly
-            :disabled="disabled || ['1', '4'].includes(formData.workType as string)"
+            :disabled="disabled || ['1', '4', '10'].includes(formData.workType as string)"
             name="workGrade"
             label="作业等级"
             placeholder="请选择"
@@ -825,7 +837,7 @@
     />
     <!-- 作业等级-->
     <van-popup v-model:show="showPicker.workGrade" position="bottom">
-      <van-picker :columns="workGradeList[formData.workType]" @cancel="showPicker.workGrade = false" @confirm="onConfirm($event, 'workGrade')" />
+      <van-picker :columns="formData.workType === '10' ? levelList : workGradeList[formData.workType]" @cancel="showPicker.workGrade = false" @confirm="onConfirm($event, 'workGrade')" />
     </van-popup>
     <van-popup v-model:show="showPicker.highWorkLevel" position="bottom">
       <van-picker :columns="levelList" @cancel="showPicker.highWorkLevel = false" @confirm="onConfirm($event, 'highWorkLevel')" />
@@ -1019,7 +1031,7 @@
   const operatorParams = ref<any>({});
   const openPicker = (key, tag?) => {
     if (readonly.value || isExam.value) return;
-    if (key == 'workGrade' && ['1', '4'].includes(formData.value.workType)) {
+    if (key == 'workGrade' && ['1', '4', '10'].includes(formData.value.workType)) {
       return;
     }
     if (key == 'operator') {
@@ -1085,6 +1097,9 @@
     }
     if (formData.value.workType == '1' && formData.value.workHeight) {
       workHeightChange({ target: { value: formData.value.workHeight } });
+    }
+    if (formData.value.workType == '10' && formData.value.operatingVoltageKv) {
+      voltageChange(formData.value.operatingVoltageKv);
     }
     // 查看、编辑详情回显
     if (route.query.id) {
@@ -1177,6 +1192,20 @@
     } else if (val.target.value > 5 && val.target.value <= 15) {
       formData.value.workGrade = '二级';
     } else if (val.target.value >= 2 && val.target.value <= 5) {
+      formData.value.workGrade = '一级';
+    }
+  };
+  // 作业电压变更 → 自动计算作业等级
+  const voltageChange = (val) => {
+    const v = parseFloat(val?.target?.value ?? val);
+    if (isNaN(v)) return;
+    if (v >= 110) {
+      formData.value.workGrade = '一级';
+    } else if (v >= 35) {
+      formData.value.workGrade = '二级';
+    } else if (v >= 1) {
+      formData.value.workGrade = '三级';
+    } else {
       formData.value.workGrade = '一级';
     }
   };
@@ -1283,6 +1312,7 @@
         formData.value.workGrade = '';
         formData.value.workIdNo = '';
         formData.value.operator = '';
+        formData.value.operatingVoltageKv = undefined;
         if (formData.value.affiliation) {
           getLimitSpaceFn(formData.value.affiliation);
         }
