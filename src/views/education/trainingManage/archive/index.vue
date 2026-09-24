@@ -306,17 +306,21 @@
     });
   }
   function checkUserPrem(record) {
+    // 必须有核查签字角色
     if (!userinfo.value.roleList.map((item) => item.roleCode).includes('verify_sign_user')) {
       return false;
     }
+    // 本人未签字，不能核查
     if (record.userSign == null) {
       return false;
     }
+    // 已核查过，不能重复核查
     if (record.checkSign !== null) {
       return false;
     }
+    // 安全科(A04B01C11)用户只能给同属安全科的人员核查签字
     if (userinfo.value.orgCode.includes('A04B01C11')) {
-      return true;
+      return record.orgCode && record.orgCode.includes('A04B01C11');
     }
     return true;
   }
