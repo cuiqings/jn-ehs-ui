@@ -430,18 +430,19 @@
           <a-input :maxlength="200" v-model:value="safetyWorkCheckForm.desc" placeholder="请输入" />
         </a-form-item>
         <a-form-item name="result" label="检查结果" required>
-          <a-radio-group style="padding-left: 10px" v-model:value="safetyWorkCheckForm.result">
+          <a-radio-group style="padding-left: 10px" v-model:value="safetyWorkCheckForm.result" @change="onSafetyResultChange">
             <a-radio value="1">合格</a-radio>
             <a-radio value="2">不合格</a-radio>
+            <a-radio value="3">作业已完结</a-radio>
           </a-radio-group>
         </a-form-item>
         <a-form-item name="yhlb" label="隐患类别" v-if="safetyWorkCheckForm.result == '2'" required>
           <JSelectMultiple v-model:value="safetyWorkCheckForm.yhlb" :show-choose-option="false" placeholder="请选择" dictCode="sk_yh_type" />
         </a-form-item>
-        <a-form-item v-if="!UnhazardousWork" label="检查照片" name="imgMap" required>
+        <a-form-item v-if="!UnhazardousWork && safetyWorkCheckForm.result !== '3'" label="检查照片" name="imgMap" required>
           <CheckImgUpload ref="checkImgUploadRef" v-model:value="safetyWorkCheckForm.imgMap" />
         </a-form-item>
-        <a-form-item v-else label="检查照片" name="imgUrl" required>
+        <a-form-item v-else-if="UnhazardousWork && safetyWorkCheckForm.result !== '3'" label="检查照片" name="imgUrl" required>
           <JImageUpload v-model:value="safetyWorkCheckForm.imgUrl" :isYhWatermark="true" :fileMax="10" text="" bizPath="hiddenTrouble" />
         </a-form-item>
         <a-form-item label="责任人" name="sceneHead" :colon="false" v-if="safetyWorkCheckForm.result == '2'">
@@ -893,7 +894,7 @@
     imgUrl: '',
     yhlb: undefined,
   });
-  const safetyWorkCheckRules = {
+  const safetyWorkCheckRules = computed(() => ({
     result: [
       {
         required: true,
@@ -917,20 +918,30 @@
     ],
     imgMap: [
       {
-        validator: () => checkImgUploadRef.value?.validate(),
+        validator: () => {
+          if (safetyWorkCheckForm.value.result === '3') return Promise.resolve();
+          return checkImgUploadRef.value?.validate();
+        },
         trigger: 'change',
       },
     ],
     imgUrl: [
       {
-        required: true,
-        message: '请上传',
+        validator: (_: any, value: string) => {
+          if (safetyWorkCheckForm.value.result === '3') return Promise.resolve();
+          return value ? Promise.resolve() : Promise.reject('请上传');
+        },
         trigger: 'change',
       },
     ],
-  };
+  }));
   const saretyWorkCheckFormRef = ref();
   const checkImgUploadRef = ref();
+  const onSafetyResultChange = (e: any) => {
+    if (e.target.value !== '2') {
+      safetyWorkCheckForm.value.yhlb = undefined;
+    }
+  };
   const safetyWorkCheck = (item) => {
     currentItem.value = item;
     safetyWorkCheckForm.value.desc = '';
@@ -945,8 +956,12 @@
     await saretyWorkCheckFormRef.value.validate();
     confirmLoading.value = true;
     const { imgMap, imgUrl, ...rest } = safetyWorkCheckForm.value;
-    // 非高危作业只传默认检查照片（imgUrl），不分5类
-    const imgData = UnhazardousWork.value ? { imgUrl, imgType: IMG_TYPE_OLD } : { imgList: buildImgList(imgMap), imgType: IMG_TYPE_NEW };
+    const isFinished = rest.result === '3';
+    if (isFinished) rest.result = '1';
+    // 非高危作业只传默认检查照片（imgUrl），不分5类；作业已完结不传照片
+    const imgData = isFinished
+      ? (UnhazardousWork.value ? { imgUrl: '', imgType: IMG_TYPE_OLD } : { imgList: [], imgType: IMG_TYPE_NEW })
+      : (UnhazardousWork.value ? { imgUrl, imgType: IMG_TYPE_OLD } : { imgList: buildImgList(imgMap), imgType: IMG_TYPE_NEW });
     await securityConfirmation({
       ...rest,
       ...imgData,

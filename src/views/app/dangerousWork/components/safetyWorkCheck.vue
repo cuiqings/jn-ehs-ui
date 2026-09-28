@@ -1,6 +1,7 @@
 <template>
   <van-dialog
     :style="{ top: dTop + '%' }"
+    width="80%"
     ref="dialogRef"
     v-model:show="show"
     title="安全作业检查"
@@ -26,9 +27,10 @@
       />
       <van-field required name="result" label="检查结果" :rules="[{ required: true, message: '请选择' }]">
         <template #input>
-          <van-radio-group v-model="dialogFormData.result" direction="horizontal">
+          <van-radio-group v-model="dialogFormData.result" direction="horizontal" @change="onResultChange">
             <van-radio icon-size="16px" name="1">合格</van-radio>
             <van-radio icon-size="16px" name="2">不合格</van-radio>
+            <van-radio icon-size="16px" name="3">作业已完结</van-radio>
           </van-radio-group>
         </template>
       </van-field>
@@ -44,12 +46,12 @@
         @click="showyhType = true"
         :rules="[{ required: true, message: '请选择隐患类别' }]"
       />
-      <van-field v-if="!isUnhazardous" required name="imgList" label="检查照片" label-align="top" :rules="[{ validator: fileValidator }]">
+      <van-field v-if="!isUnhazardous && dialogFormData.result !== '3'" required name="imgList" label="检查照片" label-align="top" :rules="[{ validator: fileValidator }]">
         <template #input>
           <CheckImgUpload ref="checkImgUploadRef" :businessId="curItem.id" v-model:value="dialogFormData.imgMap" />
         </template>
       </van-field>
-      <van-field v-else required name="imgUrl" label="检查照片" :rules="[{ validator: fileValidator, message: '图片上传中请稍后！' }]">
+      <van-field v-else-if="isUnhazardous && dialogFormData.result !== '3'" required name="imgUrl" label="检查照片" :rules="[{ validator: fileValidator, message: '图片上传中请稍后！' }]">
         <template #input>
           <RealCameraUpload
             :key="curItem.id"
@@ -104,6 +106,7 @@
   const showyhType = ref(false);
   const sk_yh_type = userStore.getAllDictItems.sk_yh_type;
   const showPickeranalysisTime = ref(false);
+  const workFinished = computed(() => dialogFormData.result === '3');
   const props = defineProps({
     show: {
       type: Boolean,
@@ -148,6 +151,14 @@
     yhlbLabel: '',
     analysisTime: undefined,
   });
+
+  const onResultChange = (val: string) => {
+    // 切换选项时清空隐患类别
+    if (val !== '2') {
+      dialogFormData.yhlb = '';
+      dialogFormData.yhlbLabel = '';
+    }
+  };
 
   const cancel = () => {
     emits('update:show', false);
@@ -247,15 +258,28 @@
     try {
       await dialogForm.value.validate();
       const { imgMap, imgUrl, ...rest } = dialogFormData;
-      const imgData = isUnhazardous.value
-        ? { imgUrl: Array.isArray(imgUrl) ? imgUrl.join(',') : imgUrl, imgType: IMG_TYPE_OLD }
-        : { imgList: buildImgList(imgMap), imgType: IMG_TYPE_NEW };
+
+      let imgData: any;
+      if (workFinished.value) {
+        // 作业已完结：不传照片，结果固定为合格传 1
+        imgData = isUnhazardous.value
+          ? { imgUrl: '', imgType: IMG_TYPE_OLD }
+          : { imgList: [], imgType: IMG_TYPE_NEW };
+        rest.result = '1';
+      } else {
+        imgData = isUnhazardous.value
+          ? { imgUrl: Array.isArray(imgUrl) ? imgUrl.join(',') : imgUrl, imgType: IMG_TYPE_OLD }
+          : { imgList: buildImgList(imgMap), imgType: IMG_TYPE_NEW };
+      }
+
       await securityConfirmation({
         ...rest,
         ...imgData,
         id: props.curItem.id,
       });
-      await removeSubmittedPhotoCache(originalImgMap, originalImgUrl);
+      if (!workFinished.value) {
+        await removeSubmittedPhotoCache(originalImgMap, originalImgUrl);
+      }
       emits('submit');
       emits('update:show', false);
       return true;

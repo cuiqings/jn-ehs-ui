@@ -324,9 +324,7 @@
     }
     return true;
   }
-  /**
-   * 操作栏
-   */
+ 
 
   function getTableAction(record) {
     return [
