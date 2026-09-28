@@ -21,10 +21,15 @@
 
 <script setup lang="ts">
   import { BasicModal, useModalInner } from '/@/components/Modal';
-  import { ref } from 'vue';
+  import { ref, computed } from 'vue';
   import { JImageUpload } from '/@/components/Form';
   import { addCheckSign } from './archive.api';
+  import { useUserStore } from '/@/store/modules/user';
+
   const emit = defineEmits(['success']);
+  const userStore = useUserStore();
+  const userInfo = computed(() => userStore.getUserInfo);
+
   const formRef = ref<any>();
   let formRules = {
     sign: [{ required: true, message: '请上传核查人签字', trigger: 'change' }],
@@ -32,7 +37,9 @@
   let formState = ref({ sign: '', id: '' });
   const [registerModal, { setModalProps, closeModal }] = useModalInner(async (id) => {
     formState.value.id = id;
-    formState.value.sign = '';
+    // 自动带入用户手写签名（app 端通过 appEdit 接口存储在 signature 字段）
+    const sig = userInfo.value.signature;
+    formState.value.sign = sig && /^http/i.test(sig) ? sig : '';
     setModalProps({ confirmLoading: false });
   });
   const handleSubmit = async () => {
