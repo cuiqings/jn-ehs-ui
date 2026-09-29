@@ -37,16 +37,11 @@
           </a-form-item>
         </template>
         <template v-if="['演练总结'].includes(title)">
-          <a-form-item :labelCol="{ span: 5 }" label="5、演练总结" name="drillSummary" :rules="[{ required: true, message: '请上传' }]">
-            <JUpload accept=".doc,.docx,.pdf,.xls,.xlsx" ref="uploadRef" :maxCount="10" v-model:value="formState.drillSummary" text="上传附件" />
+          <a-form-item :labelCol="{ span: 5 }" label="5、演练总结" name="drillSummary">
+            <JUpload disabled accept=".doc,.docx,.pdf,.xls,.xlsx" ref="uploadRef" :maxCount="10" v-model:value="formState.drillSummary" text="上传附件" />
           </a-form-item>
-          <a-form-item
-            :labelCol="{ span: 5 }"
-            label="6、演练存在不足之处整改落实情况"
-            name="drillCorrective"
-            :rules="[{ required: true, message: '请上传' }]"
-          >
-            <JUpload accept=".doc,.docx,.pdf,.xls,.xlsx" ref="uploadRef" :maxCount="10" v-model:value="formState.drillCorrective" text="上传附件" />
+          <a-form-item :labelCol="{ span: 5 }" label="6、演练存在不足之处整改落实情况" name="drillCorrective">
+            <JUpload disabled accept=".doc,.docx,.pdf,.xls,.xlsx" ref="uploadRef" :maxCount="10" v-model:value="formState.drillCorrective" text="上传附件" />
           </a-form-item>
         </template>
         <template v-if="['影像资料', '详情'].includes(title)">
@@ -84,6 +79,12 @@
               <InputTextArea auto-size style="width: calc(100% - 100px)" v-model:value="formState.rescue1" placeholder="请输入" allow-clear />
               <a-button style="margin-left: 12px" type="primary" @click="handleModal('jp', '现场救援讲评模板')">填写模板</a-button>
             </div>
+          </a-form-item>
+          <a-form-item label="演练不足" name="drillCorrective" :rules="[{ required: true, message: '请上传' }]">
+            <JUpload accept=".doc,.docx,.pdf,.xls,.xlsx" :disabled="title == '详情'" ref="uploadRef" :maxCount="10" v-model:value="formState.drillCorrective" text="上传附件" />
+          </a-form-item>
+          <a-form-item label="演练总结" name="drillSummary" :rules="[{ required: true, message: '请上传' }]">
+            <JUpload accept=".doc,.docx,.pdf,.xls,.xlsx" :disabled="title == '详情'" ref="uploadRef" :maxCount="10" v-model:value="formState.drillSummary" text="上传附件" />
           </a-form-item>
         </template>
       </div>
@@ -138,7 +139,7 @@
       </div>
     </a-form>
 
-    <template v-if="title != '详情'" #footer>
+    <template v-if="title != '详情' && title != '演练总结'" #footer>
       <div class="btns">
         <a-space :size="24">
           <a-button type="default" @click="backFn">取消</a-button>
@@ -202,6 +203,9 @@
         res.drillEmergencyPlan = res.drillEmergencyPlan?.join(',');
         res.drillScript = res.drillScript?.join(',');
         Object.assign(detailInfo.value, res);
+        // 演练总结预览回显
+        if (res.drillSummary) formState.value.drillSummary = Array.isArray(res.drillSummary) ? res.drillSummary.join(',') : res.drillSummary;
+        if (res.drillCorrective) formState.value.drillCorrective = Array.isArray(res.drillCorrective) ? res.drillCorrective.join(',') : res.drillCorrective;
         if(res.approvalStatus == 2) {
           const jsonObject = data.jsonObject
           Object.assign(formState.value, jsonObject)
@@ -213,6 +217,17 @@
           });
           if (jsonObject.reviewContent) {
             formState.value.reviewContent1 = jsonObject.reviewContent[0].content
+          }
+          // 回填演练不足和演练总结
+          if (jsonObject.drillCorrective) {
+            formState.value.drillCorrective = Array.isArray(jsonObject.drillCorrective)
+              ? jsonObject.drillCorrective.join(',')
+              : jsonObject.drillCorrective
+          }
+          if (jsonObject.drillSummary) {
+            formState.value.drillSummary = Array.isArray(jsonObject.drillSummary)
+              ? jsonObject.drillSummary.join(',')
+              : jsonObject.drillSummary
           }
           let key2 = ['personArrival', 'workMaterial', 'personalProtection', 'overallOrganization', 'organizationDivision', 'practicalEffect', 'reportSuperior',
             'safetyDepartment', 'rescueEffect', 'alertCooperation'];
@@ -234,6 +249,8 @@
     purpose1: '',
     record1: '',
     rescue1: '',
+    drillCorrective: '',
+    drillSummary: '',
     personArrival: ['迅速准确、按时到位'],
     workMaterial: ['充分、有效'],
     personalProtection: ['防护到位'],
@@ -344,6 +361,9 @@
           isSelect: true,
         });
       }
+      // 上传文件字段转数组
+      if (params.drillCorrective) params.drillCorrective = params.drillCorrective.split(',');
+      if (params.drillSummary) params.drillSummary = params.drillSummary.split(',');
       pingkjia.map((item) => {
         params[item.key] = item.items.map((citem, i) => {
           if (params[item.key].includes(citem)) {
@@ -373,17 +393,8 @@
       return false;
     }
     if (title.value == '演练总结') {
-      params.drillSummary = params.drillSummary.split(',');
-      params.drillCorrective = params.drillCorrective.split(',');
-      drillSummary(params)
-        .then(() => {
-          submitIng.value = false;
-          closeDrawer();
-          emits('success');
-        })
-        .catch(() => {
-          submitIng.value = false;
-        });
+      // 演练总结为只读预览，无需提交
+      closeDrawer();
       return false;
     }
     openSignModal(true, { id: getId() });

@@ -46,8 +46,7 @@
               :maxlength="500"
               placeholder="请输入"
               :rules="[{ required: true, message: '请输入' }]"
-            >
-            </van-field>
+            />
           </template>
           <template v-if="title == '演练记录'">
             <van-field
@@ -86,7 +85,7 @@
               name="rescue1"
               v-model="formState.rescue1"
               label-align="top"
-              placeholder="请选择"
+              placeholder="请输入"
               type="textarea"
               maxlength="200"
               rows="1"
@@ -100,37 +99,34 @@
                 <van-button size="mini" @click="openModal('jp', '现场救援讲评填写模板')" type="primary">填写模板</van-button>
               </template>
             </van-field>
+            <van-field required label="演练不足" name="drillCorrective" :rules="[{ required: true, message: '请上传' }]">
+              <template #input>
+                <AppCustomizeUpload accept=".doc,.docx,.pdf,.xls,.xlsx" :max-count="10" v-model:fileList="formState.drillCorrective" />
+              </template>
+            </van-field>
+            <van-field required label="演练总结" name="drillSummary" :rules="[{ required: true, message: '请上传' }]">
+              <template #input>
+                <AppCustomizeUpload accept=".doc,.docx,.pdf,.xls,.xlsx" :max-count="10" v-model:fileList="formState.drillSummary" />
+              </template>
+            </van-field>
             <div class="tit">评估报告</div>
             <JUserModal
-                type="checkbox"
-                :elInfo="{ type: 'vant', attr: { label: '评审人', required: true, rules: [{ required: true, message: '请选择评估人' }] } }"
-                v-model:value="formState.reviewer"
+              type="checkbox"
+              :elInfo="{ type: 'vant', attr: { label: '评审人', required: true, rules: [{ required: true, message: '请选择评估人' }] } }"
+              v-model:value="formState.reviewer"
             />
-            
             <JUserModal
-                type="checkbox"
-                :elInfo="{ type: 'vant', attr: { label: '批准人', required: true, rules: [{ required: true, message: '请选择批准人' }] } }"
-                v-model:value="formState.approver"
+              type="checkbox"
+              :elInfo="{ type: 'vant', attr: { label: '批准人', required: true, rules: [{ required: true, message: '请选择批准人' }] } }"
+              v-model:value="formState.approver"
             />
-            <van-field
-              required
-              v-model="formState.aqb"
-              label="安全部审批人"
-              readonly
-              placeholder="请输入"
-            />
-            <van-field
-              required
-              :rules="[{ required: true, message: '请输入' }]"
-              v-model="formState.reviewPlace"
-              label="评审地点"
-              placeholder="请输入"
-            />
+            <van-field required v-model="formState.aqb" label="安全部审批人" readonly placeholder="请输入" />
+            <van-field required :rules="[{ required: true, message: '请输入' }]" v-model="formState.reviewPlace" label="评审地点" placeholder="请输入" />
             <van-field
               v-model="formState.reviewContent1"
               name="reviewContent1"
               label-align="top"
-              placeholder="请选择"
+              placeholder="请输入"
               label="评审内容"
               type="textarea"
               maxlength="200"
@@ -138,37 +134,18 @@
               autosize
               input-align="left"
               required
-              :rules="[{ required: true, message: '请选择' }]"
+              :rules="[{ required: true, message: '请输入' }]"
             >
               <template #button>
                 <van-button size="mini" @click="openModal('nr', '评审内容填写模板')" type="primary">填写模板</van-button>
               </template>
             </van-field>
-            <van-field
-              required
-              label="评审过程"
-              v-model="formState.reviewProcess"
-              name="reviewProcess"
-              type="textarea"
-              :maxlength="500"
-              placeholder="请输入"
-              :rules="[{ required: true, message: '请输入' }]"
-            >
-            </van-field>
-            <van-field
-              required
-              label="评审结论"
-              v-model="formState.reviewResult"
-              name="reviewResult"
-              type="textarea"
-              :maxlength="500"
-              placeholder="请输入"
-              :rules="[{ required: true, message: '请输入' }]"
-            >
-            </van-field>
+            <van-field required label="评审过程" v-model="formState.reviewProcess" name="reviewProcess" type="textarea" :maxlength="500" placeholder="请输入" :rules="[{ required: true, message: '请输入' }]" />
+            <van-field required label="评审结论" v-model="formState.reviewResult" name="reviewResult" type="textarea" :maxlength="500" placeholder="请输入" :rules="[{ required: true, message: '请输入' }]" />
             <div class="tit">演练评价表</div>
             <van-field
               v-for="item in pingkjia"
+              :key="item.key"
               :name="item.key"
               label-align="top"
               placeholder="请选择"
@@ -189,21 +166,16 @@
               </template>
             </van-field>
           </template>
+          <!-- 演练总结：只读预览，数据来自演练记录已上传的文件 -->
           <template v-if="title == '演练总结'">
-            <van-field required :labelCol="{ span: 5 }" label="5、演练总结" name="drillSummary" :rules="[{ required: true, message: '请上传' }]">
+            <van-field label="5、演练总结" name="drillSummary">
               <template #input>
-                <AppCustomizeUpload accept=".doc,.docx,.pdf,.xls,.xlsx" :maxCount="10" v-model:fileList="formState.drillSummary" />
+                <AppCustomizeUpload accept=".doc,.docx,.pdf,.xls,.xlsx" :max-count="10" v-model:fileList="formState.drillSummary" :disabled="true" />
               </template>
             </van-field>
-            <van-field
-              required
-              :labelCol="{ span: 5 }"
-              label="6、演练存在不足之处整改落实情况"
-              name="drillCorrective"
-              :rules="[{ required: true, message: '请上传' }]"
-            >
+            <van-field label="6、演练不足" name="drillCorrective">
               <template #input>
-                <AppCustomizeUpload accept=".doc,.docx,.pdf,.xls,.xlsx" :maxCount="10" v-model:fileList="formState.drillCorrective" />
+                <AppCustomizeUpload accept=".doc,.docx,.pdf,.xls,.xlsx" :max-count="10" v-model:fileList="formState.drillCorrective" :disabled="true" />
               </template>
             </van-field>
           </template>
@@ -213,10 +185,10 @@
 
     <div class="foot">
       <van-button size="small" @click="cancel">取消</van-button>
-      <van-button size="small" type="primary" :loading="submitIng" @click="submit">确认</van-button>
+      <van-button v-if="title != '演练总结'" size="small" type="primary" :loading="submitIng" @click="submit">确认</van-button>
     </div>
   </div>
-  
+
   <a-modal v-model:visible="visible" :width="800" :title="fillTitle" @cancel="() => (visible = false)" class="template-modal" :footer="null">
     <div class="template-content">
       <div v-for="(item, index) in fillData" :key="index" class="template-item">
@@ -227,12 +199,13 @@
 </template>
 <script lang="ts" setup>
   import AppCustomizeUpload from '../../components/AppCustomizeUpload.vue';
-  import { taskDetail, videoData, drillScheme, trainContent, drillRecord, drillSummary } from '/@/views/emergencyNew/api';
+  import { taskDetail, videoData, drillScheme, trainContent, drillRecord } from '/@/views/emergencyNew/api';
   import { useData } from '/@/views/emergencyNew/task/hooks/useData';
   import JUserModal from '/@/components/App/JUserModal.vue';
   import { useRoute, useRouter } from 'vue-router';
   import { computed, ref, onMounted } from 'vue';
   import { FormInstance } from 'vant';
+
   const detailInfo = ref<any>({});
   const route = useRoute();
   const router = useRouter();
@@ -247,6 +220,8 @@
     record: [],
     rescue: [],
     reviewContent: [],
+    drillCorrective: '',
+    drillSummary: '',
     personArrival: [],
     workMaterial: [],
     personalProtection: [],
@@ -257,12 +232,12 @@
     safetyDepartment: [],
     rescueEffect: [],
     alertCooperation: [],
-    drillSummary: '',
-    drillCorrective: '',
     aqb: '应急演练安全部审批人'
   });
+
   const title = computed(() => route.query.title);
   const { fillTemplate, pingkjia } = useData();
+
   const pageInit = async () => {
     formState.value.id = route.query.id;
     let res = await taskDetail(route.query.id);
@@ -270,6 +245,14 @@
       res.annex = JSON.parse(res.annex).toString();
     }
     detailInfo.value = res;
+
+    // 演练总结：只读回显，直接从接口数据取
+    if (title.value == '演练总结') {
+      if (res.drillSummary) formState.value.drillSummary = Array.isArray(res.drillSummary) ? res.drillSummary.join(',') : res.drillSummary;
+      if (res.drillCorrective) formState.value.drillCorrective = Array.isArray(res.drillCorrective) ? res.drillCorrective.join(',') : res.drillCorrective;
+      return;
+    }
+
     if (title.value == '演练记录') {
       Object.assign(formState.value, {
         personArrival: '迅速准确、按时到位',
@@ -283,36 +266,49 @@
         rescueEffect: '按要求协作',
         alertCooperation: '按要求配合',
       });
-      if(res.approvalStatus == 2) {
-        const jsonObject = JSON.parse(<string>sessionStorage.getItem('drillId'))
-        Object.assign(formState.value, jsonObject)
+      if (res.approvalStatus == 2) {
+        const jsonObject = JSON.parse(<string>sessionStorage.getItem('drillId'));
+        Object.assign(formState.value, jsonObject);
         let keys = ['purpose', 'record', 'rescue'];
         keys.map((k) => {
           if (jsonObject[k]) {
-            formState.value[k+'1'] = jsonObject[k][0]
+            formState.value[k + '1'] = jsonObject[k][0];
             formState.value[k] = [];
           }
         });
         if (jsonObject.reviewContent) {
-          formState.value.reviewContent1 = jsonObject.reviewContent[0].content
-          formState.value.reviewContent = []
+          formState.value.reviewContent1 = jsonObject.reviewContent[0].content;
+          formState.value.reviewContent = [];
+        }
+        // 回填演练不足和演练总结
+        if (jsonObject.drillCorrective) {
+          formState.value.drillCorrective = Array.isArray(jsonObject.drillCorrective)
+            ? jsonObject.drillCorrective.join(',')
+            : jsonObject.drillCorrective;
+        }
+        if (jsonObject.drillSummary) {
+          formState.value.drillSummary = Array.isArray(jsonObject.drillSummary)
+            ? jsonObject.drillSummary.join(',')
+            : jsonObject.drillSummary;
         }
         let key2 = ['personArrival', 'workMaterial', 'personalProtection', 'overallOrganization', 'organizationDivision', 'practicalEffect', 'reportSuperior',
           'safetyDepartment', 'rescueEffect', 'alertCooperation'];
         key2.map(k => {
-          if(jsonObject[k] && jsonObject[k].length) {
-            formState.value[k] = jsonObject[k].filter(item =>  item.isSelect == 'true')[0].content
+          if (jsonObject[k] && jsonObject[k].length) {
+            formState.value[k] = jsonObject[k].filter(item => item.isSelect == 'true')[0].content;
           }
-        })
-        console.log(formState.value)
+        });
+        console.log(formState.value);
       }
     }
   };
+
   onMounted(() => {
     pageInit();
   });
+
   const submitIng = ref(false);
-  const submit = async (type) => {
+  const submit = async () => {
     await formRef.value?.validate();
     submitIng.value = true;
     let params = JSON.parse(JSON.stringify(formState.value));
@@ -321,36 +317,21 @@
       params.drillEmergencyPlan = params.drillEmergencyPlan.split(',');
       params.drillScript = params.drillScript.split(',');
       drillScheme(params)
-        .then((res) => {
-          submitIng.value = false;
-          router.back();
-        })
-        .catch((err) => {
-          submitIng.value = false;
-        });
+        .then(() => { submitIng.value = false; router.back(); })
+        .catch(() => { submitIng.value = false; });
       return false;
     }
     if (title.value == '影像资料') {
       params.drillVideoData = params.drillVideoData.split(',');
       videoData(params)
-        .then((res) => {
-          submitIng.value = false;
-          router.back();
-        })
-        .catch((err) => {
-          submitIng.value = false;
-        });
+        .then(() => { submitIng.value = false; router.back(); })
+        .catch(() => { submitIng.value = false; });
       return false;
     }
     if (title.value == '动员培训') {
       trainContent(params)
-        .then((res) => {
-          submitIng.value = false;
-          router.back();
-        })
-        .catch((err) => {
-          submitIng.value = false;
-        });
+        .then(() => { submitIng.value = false; router.back(); })
+        .catch(() => { submitIng.value = false; });
       return false;
     }
     if (title.value == '演练记录') {
@@ -360,61 +341,31 @@
           params[k].push(params[k + '1']);
         }
       });
-      params.reviewContent = params.reviewContent.map((item, idx) => {
-        let obj = {
-          content: item,
-          serialNumber: idx + 1,
-          isSelect: true,
-        };
-        return obj;
-      });
+      params.reviewContent = params.reviewContent.map((item, idx) => ({
+        content: item,
+        serialNumber: idx + 1,
+        isSelect: true,
+      }));
       if (params.reviewContent1) {
-        params.reviewContent.push({
-          content: params.reviewContent1,
-          isSelect: true,
-        });
+        params.reviewContent.push({ content: params.reviewContent1, isSelect: true });
       }
       pingkjia.map((item) => {
-        params[item.key] = item.items.map((citem, i) => {
-          if (params[item.key].includes(citem)) {
-            return {
-              serialNumber: i + 1,
-              isSelect: true,
-              content: citem,
-            };
-          } else {
-            return {
-              serialNumber: i + 1,
-              isSelect: false,
-              content: citem,
-            };
-          }
-        });
+        params[item.key] = item.items.map((citem, i) => ({
+          serialNumber: i + 1,
+          isSelect: params[item.key].includes(citem),
+          content: citem,
+        }));
       });
-      console.log(params);
+      // 上传文件字段转数组
+      if (params.drillCorrective) params.drillCorrective = params.drillCorrective.split(',');
+      if (params.drillSummary) params.drillSummary = params.drillSummary.split(',');
       drillRecord(params)
-        .then((res) => {
-          submitIng.value = false;
-          router.back();
-        })
-        .catch((err) => {
-          submitIng.value = false;
-        });
+        .then(() => { submitIng.value = false; router.back(); })
+        .catch(() => { submitIng.value = false; });
       return false;
     }
-    if (title.value == '演练总结') {
-      params.drillSummary = params.drillSummary.split(',');
-      params.drillCorrective = params.drillCorrective.split(',');
-      drillSummary(params)
-        .then((res) => {
-          submitIng.value = false;
-          router.back();
-        })
-        .catch((err) => {
-          submitIng.value = false;
-        });
-    }
   };
+
   const cancel = () => {
     router.back();
   };
@@ -517,6 +468,7 @@
       margin-top: 4px !important;
     }
   }
+
   // 模板模态框样式
   .template-modal {
     .ant-modal-body {
@@ -560,5 +512,12 @@
     color: #333;
     margin-right: 16px;
     word-break: break-all;
+  }
+
+  .tit {
+    font-size: 14px;
+    font-weight: 600;
+    color: #1890ff;
+    padding: 12px 16px 8px;
   }
 </style>
