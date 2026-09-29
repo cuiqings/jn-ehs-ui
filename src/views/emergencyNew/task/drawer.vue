@@ -139,7 +139,7 @@
       </div>
     </a-form>
 
-    <template v-if="title != '详情' && title != '演练总结'" #footer>
+    <template v-if="title != '详情'" #footer>
       <div class="btns">
         <a-space :size="24">
           <a-button type="default" @click="backFn">取消</a-button>
@@ -393,8 +393,17 @@
       return false;
     }
     if (title.value == '演练总结') {
-      // 演练总结为只读预览，无需提交
-      closeDrawer();
+      if (params.drillSummary) params.drillSummary = params.drillSummary.split(',');
+      if (params.drillCorrective) params.drillCorrective = params.drillCorrective.split(',');
+      drillSummary(params)
+        .then(() => {
+          submitIng.value = false;
+          closeDrawer();
+          emits('success');
+        })
+        .catch(() => {
+          submitIng.value = false;
+        });
       return false;
     }
     openSignModal(true, { id: getId() });

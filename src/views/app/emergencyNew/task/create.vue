@@ -185,7 +185,7 @@
 
     <div class="foot">
       <van-button size="small" @click="cancel">取消</van-button>
-      <van-button v-if="title != '演练总结'" size="small" type="primary" :loading="submitIng" @click="submit">确认</van-button>
+      <van-button size="small" type="primary" :loading="submitIng" @click="submit">确认</van-button>
     </div>
   </div>
 
@@ -199,7 +199,7 @@
 </template>
 <script lang="ts" setup>
   import AppCustomizeUpload from '../../components/AppCustomizeUpload.vue';
-  import { taskDetail, videoData, drillScheme, trainContent, drillRecord } from '/@/views/emergencyNew/api';
+  import { taskDetail, videoData, drillScheme, trainContent, drillRecord, drillSummary } from '/@/views/emergencyNew/api';
   import { useData } from '/@/views/emergencyNew/task/hooks/useData';
   import JUserModal from '/@/components/App/JUserModal.vue';
   import { useRoute, useRouter } from 'vue-router';
@@ -360,6 +360,14 @@
       if (params.drillCorrective) params.drillCorrective = params.drillCorrective.split(',');
       if (params.drillSummary) params.drillSummary = params.drillSummary.split(',');
       drillRecord(params)
+        .then(() => { submitIng.value = false; router.back(); })
+        .catch(() => { submitIng.value = false; });
+      return false;
+    }
+    if (title.value == '演练总结') {
+      if (params.drillSummary) params.drillSummary = params.drillSummary.split(',');
+      if (params.drillCorrective) params.drillCorrective = params.drillCorrective.split(',');
+      drillSummary(params)
         .then(() => { submitIng.value = false; router.back(); })
         .catch(() => { submitIng.value = false; });
       return false;
