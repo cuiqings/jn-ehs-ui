@@ -119,7 +119,7 @@
           />
         </a-form-item>
       </a-col>
-      <a-col :span="12" v-if="!unhazardousWork && formData.workType != '10'">
+      <a-col :span="12" v-if="!unhazardousWork">
         <a-form-item label="作业单位" :colon="false" name="workUnit">
           <a-tree-select
             :disabled="readonly"
@@ -133,7 +133,7 @@
           />
         </a-form-item>
       </a-col>
-      <a-col :span="12" v-if="!unhazardousWork && formData.workType == '10'">
+      <a-col :span="12" v-if="formData.workType == '10'">
         <a-form-item label="作业电压(kV)" :colon="false" name="operatingVoltageKv">
           <a-input-number
             style="width: 100%"
@@ -760,7 +760,7 @@
     // 电气作业时 operatingVoltageKv 必填，其他作业类型不校验
     if (value === '10') {
       formRules.value.operatingVoltageKv = [{ required: true, message: '请输入作业电压！', trigger: 'change' }];
-      delete formRules.value.workUnit;
+      formRules.value.workUnit = [{ required: true, message: '请选择作业车间！', trigger: 'change' }];
     } else {
       delete formRules.value.operatingVoltageKv;
       formRules.value.workUnit = [{ required: true, message: '请选择作业车间！', trigger: 'change' }];

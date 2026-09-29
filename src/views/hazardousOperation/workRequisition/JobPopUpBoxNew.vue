@@ -44,7 +44,7 @@
       <a-col :span="24">
         <a-form-item :wrapper-col="{ span: 20, offset: 4 }">
           <a-space :size="12">
-            <a-button v-if="!readonly && ['1', '2', '3', '4'].includes(workList[0].workType)" type="primary" @click="addNewWork"
+            <a-button v-if="!readonly && ['1', '2', '3', '4', '10'].includes(workList[0].workType)" type="primary" @click="addNewWork"
               >添加新作业类型</a-button
             >
             <a-button @click="save" :loading="submiting" v-if="!readonly">保存</a-button>

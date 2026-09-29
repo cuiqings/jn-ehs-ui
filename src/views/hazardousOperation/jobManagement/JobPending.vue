@@ -439,10 +439,16 @@
         <a-form-item name="yhlb" label="隐患类别" v-if="safetyWorkCheckForm.result == '2'" required>
           <JSelectMultiple v-model:value="safetyWorkCheckForm.yhlb" :show-choose-option="false" placeholder="请选择" dictCode="sk_yh_type" />
         </a-form-item>
-        <a-form-item v-if="!UnhazardousWork && safetyWorkCheckForm.result !== '3'" label="检查照片" name="imgMap" required>
-          <CheckImgUpload ref="checkImgUploadRef" v-model:value="safetyWorkCheckForm.imgMap" />
+        <a-form-item v-if="!UnhazardousWork" label="检查照片" name="imgMap" required>
+          <!-- 作业已完结：只需上传一张完结照片，不分5类 -->
+          <template v-if="safetyWorkCheckForm.result === '3'">
+            <JImageUpload v-model:value="safetyWorkCheckForm.imgUrl" :isYhWatermark="true" :fileMax="10" text="" bizPath="hiddenTrouble" />
+          </template>
+          <template v-else>
+            <CheckImgUpload ref="checkImgUploadRef" v-model:value="safetyWorkCheckForm.imgMap" />
+          </template>
         </a-form-item>
-        <a-form-item v-else-if="UnhazardousWork && safetyWorkCheckForm.result !== '3'" label="检查照片" name="imgUrl" required>
+        <a-form-item v-else-if="UnhazardousWork" label="检查照片" name="imgUrl" required>
           <JImageUpload v-model:value="safetyWorkCheckForm.imgUrl" :isYhWatermark="true" :fileMax="10" text="" bizPath="hiddenTrouble" />
         </a-form-item>
         <a-form-item label="责任人" name="sceneHead" :colon="false" v-if="safetyWorkCheckForm.result == '2'">
@@ -919,7 +925,10 @@
     imgMap: [
       {
         validator: () => {
-          if (safetyWorkCheckForm.value.result === '3') return Promise.resolve();
+          // 作业已完结（高危）：改走 imgUrl 校验
+          if (safetyWorkCheckForm.value.result === '3') {
+            return safetyWorkCheckForm.value.imgUrl ? Promise.resolve() : Promise.reject('请上传');
+          }
           return checkImgUploadRef.value?.validate();
         },
         trigger: 'change',
@@ -958,9 +967,9 @@
     const { imgMap, imgUrl, ...rest } = safetyWorkCheckForm.value;
     const isFinished = rest.result === '3';
     if (isFinished) rest.result = '1';
-    // 非高危作业只传默认检查照片（imgUrl），不分5类；作业已完结不传照片
+    // 非高危作业只传默认检查照片（imgUrl），不分5类；作业已完结走 imgUrl 单图字段
     const imgData = isFinished
-      ? (UnhazardousWork.value ? { imgUrl: '', imgType: IMG_TYPE_OLD } : { imgList: [], imgType: IMG_TYPE_NEW })
+      ? { imgUrl, imgType: IMG_TYPE_OLD }
       : (UnhazardousWork.value ? { imgUrl, imgType: IMG_TYPE_OLD } : { imgList: buildImgList(imgMap), imgType: IMG_TYPE_NEW });
     await securityConfirmation({
       ...rest,

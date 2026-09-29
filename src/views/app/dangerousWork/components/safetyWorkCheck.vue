@@ -46,12 +46,26 @@
         @click="showyhType = true"
         :rules="[{ required: true, message: '请选择隐患类别' }]"
       />
-      <van-field v-if="!isUnhazardous && dialogFormData.result !== '3'" required name="imgList" label="检查照片" label-align="top" :rules="[{ validator: fileValidator }]">
+      <van-field v-if="!isUnhazardous" required name="imgList" label="检查照片" label-align="top" :rules="[{ validator: fileValidator }]">
         <template #input>
-          <CheckImgUpload ref="checkImgUploadRef" :businessId="curItem.id" v-model:value="dialogFormData.imgMap" />
+          <!-- 作业已完结：只需上传一张完结照片，不分5类 -->
+          <template v-if="workFinished">
+            <RealCameraUpload
+              ref="finishImgUploadRef"
+              :businessId="curItem.id + '_finish'"
+              :id="curItem.id + '_finish'"
+              :maxCount="10"
+              v-model:value="dialogFormData.imgUrl"
+              albumText="离线相册"
+              biz="dangerousWork"
+            />
+          </template>
+          <template v-else>
+            <CheckImgUpload ref="checkImgUploadRef" :businessId="curItem.id" v-model:value="dialogFormData.imgMap" />
+          </template>
         </template>
       </van-field>
-      <van-field v-else-if="isUnhazardous && dialogFormData.result !== '3'" required name="imgUrl" label="检查照片" :rules="[{ validator: fileValidator, message: '图片上传中请稍后！' }]">
+      <van-field v-else-if="isUnhazardous" required name="imgUrl" label="检查照片" :rules="[{ validator: fileValidator, message: '图片上传中请稍后！' }]">
         <template #input>
           <RealCameraUpload
             :key="curItem.id"
@@ -173,7 +187,11 @@
   const dTop = ref(45);
   const dialogRef = ref(null);
 
+  const finishImgUploadRef = ref<any>(null);
+
   const fileValidator = () => {
+    // 作业已完结（高危）：走简单上传校验
+    if (!isUnhazardous.value && workFinished.value) return imgUrlValidator();
     if (!isUnhazardous.value) return checkImgUploadRef.value?.validate();
     return imgUrlValidator();
   };
@@ -260,16 +278,15 @@
       const { imgMap, imgUrl, ...rest } = dialogFormData;
 
       let imgData: any;
-      if (workFinished.value) {
-        // 作业已完结：不传照片，结果固定为合格传 1
-        imgData = isUnhazardous.value
-          ? { imgUrl: '', imgType: IMG_TYPE_OLD }
-          : { imgList: [], imgType: IMG_TYPE_NEW };
-        rest.result = '1';
+      if (isUnhazardous.value || workFinished.value) {
+        // 非高危 或 作业已完结：走简单照片字段
+        imgData = { imgUrl: Array.isArray(imgUrl) ? imgUrl.join(',') : imgUrl, imgType: IMG_TYPE_OLD };
       } else {
-        imgData = isUnhazardous.value
-          ? { imgUrl: Array.isArray(imgUrl) ? imgUrl.join(',') : imgUrl, imgType: IMG_TYPE_OLD }
-          : { imgList: buildImgList(imgMap), imgType: IMG_TYPE_NEW };
+        imgData = { imgList: buildImgList(imgMap), imgType: IMG_TYPE_NEW };
+      }
+      // 作业已完结时结果固定传合格（1）
+      if (workFinished.value) {
+        rest.result = '1';
       }
 
       await securityConfirmation({
@@ -277,9 +294,7 @@
         ...imgData,
         id: props.curItem.id,
       });
-      if (!workFinished.value) {
-        await removeSubmittedPhotoCache(originalImgMap, originalImgUrl);
-      }
+      await removeSubmittedPhotoCache(originalImgMap, originalImgUrl);
       emits('submit');
       emits('update:show', false);
       return true;

@@ -663,7 +663,7 @@
         </van-collapse-item>
         <van-collapse-item name="2">
           <template #title>
-            <span v-if="['1', '2', '3', '4'].includes(formData.workType)" style="color: #ee0a24; padding-right: 2px">*</span>
+            <span v-if="['1', '2', '3', '4', '10'].includes(formData.workType)" style="color: #ee0a24; padding-right: 2px">*</span>
             安全措施
           </template>
           <van-field

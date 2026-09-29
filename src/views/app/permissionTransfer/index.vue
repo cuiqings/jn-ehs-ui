@@ -102,6 +102,50 @@
                 </span>
               </div>
 
+              <!-- 转交原因 -->
+              <div v-if="item.remark" class="history-card__remark">
+                <span class="remark-label">转交原因：</span>
+                <span class="remark-text">{{ item.remark }}</span>
+              </div>
+
+              <!-- 转交文件 -->
+              <div v-if="parseAnnex(item.annex).length > 0" class="history-card__annex">
+                <div class="annex-header" @click="toggleAnnex(item.id)">
+                  <span class="annex-label">
+                    <van-icon name="description" size="13" color="#1989fa" style="margin-right: 3px; vertical-align: -1px" />
+                    转交文件（{{ parseAnnex(item.annex).length }}）
+                  </span>
+                  <van-icon :name="expandedAnnex.has(item.id) ? 'arrow-up' : 'arrow-down'" size="13" color="#969799" />
+                </div>
+                <div v-if="expandedAnnex.has(item.id)" class="annex-list">
+                  <div
+                    v-for="(file, fi) in parseAnnex(item.annex)"
+                    :key="fi"
+                    class="annex-item"
+                    @click="onPreviewAnnex(file, parseAnnex(item.annex))"
+                  >
+                    <!-- 图片缩略图 -->
+                    <template v-if="isImgFile(file)">
+                      <van-image
+                        :src="getFileUrl(file)"
+                        width="40"
+                        height="40"
+                        radius="4"
+                        fit="cover"
+                        class="annex-thumb"
+                      />
+                    </template>
+                    <!-- 非图片：图标 -->
+                    <template v-else>
+                      <div class="annex-icon" :class="getFileIconClass(file)">
+                        <span>{{ getFileIconLabel(file) }}</span>
+                      </div>
+                    </template>
+                    <span class="annex-name">{{ getFileName(file) }}</span>
+                  </div>
+                </div>
+              </div>
+
               <!-- 撤销按钮：仅进行中 且 查看自己数据时显示 -->
               <div v-if="item.status === '1' && filterParams.isMy === '1'" style="margin-top: 8px">
                 <van-button plain type="danger" size="small" @click="onRevoke(item)">撤销转交</van-button>
@@ -283,12 +327,13 @@
 
 <script setup lang="ts">
   import { ref, reactive, computed, watch, nextTick, onMounted, onUnmounted } from 'vue';
-  import { showConfirmDialog, showToast, showSuccessToast } from 'vant';
+  import { showConfirmDialog, showToast, showSuccessToast, showImagePreview } from 'vant';
   import { useUserStore } from '/@/store/modules/user';
   import UserPicker from './components/UserPicker.vue';
   import AppUpload from '/@/views/app/components/AppUpload.vue';
   import { getTransferList, addTransfer, revokeTransfer, getUserRoleList, getSysRoleList } from './api';
-  import { dateFormat } from '/@/utils/common/compUtils';
+  import { previewFile } from '/@/api/common/api';
+  import { dateFormat, getFileAccessHttpUrl } from '/@/utils/common/compUtils';
   import dayjs from 'dayjs';
   import { get3DepartList } from '/@/api/common/api';
 
@@ -469,6 +514,85 @@
         }
       })
       .catch(() => {});
+  };
+
+  // ─── 转交文件处理 ─────────────────────────────────────────────
+  // 记录哪些卡片的文件列表是展开状态
+  const expandedAnnex = ref<Set<string>>(new Set());
+
+  const toggleAnnex = (id: string) => {
+    const s = new Set(expandedAnnex.value);
+    if (s.has(id)) {
+      s.delete(id);
+    } else {
+      s.add(id);
+    }
+    expandedAnnex.value = s;
+  };
+
+  // 解析 annex 字段（JSON 字符串 -> 文件路径数组）
+  const parseAnnex = (annex: any): string[] => {
+    if (!annex) return [];
+    try {
+      const parsed = JSON.parse(annex);
+      return Array.isArray(parsed) ? parsed.filter(Boolean) : [];
+    } catch {
+      return [];
+    }
+  };
+
+  const getFileUrl = (path: string) => getFileAccessHttpUrl(path);
+
+  const getFileName = (path: string) => {
+    // 截取最后一段，再去掉时间戳后缀（_数字.扩展名）
+    const seg = path.split('/').pop() || path;
+    // 匹配 _数字. 去掉时间戳
+    return seg.replace(/_\d+(\.[^.]+)$/, '$1');
+  };
+
+  const isImgFile = (path: string) => /\.(jpg|jpeg|png|gif|bmp|webp)$/i.test(path);
+  const isPdfFile = (path: string) => /\.pdf$/i.test(path);
+  const isWordFile = (path: string) => /\.docx?$/i.test(path);
+  const isExcelFile = (path: string) => /\.xlsx?$/i.test(path);
+
+  const getFileIconClass = (path: string) => {
+    if (isPdfFile(path)) return 'icon-pdf';
+    if (isWordFile(path)) return 'icon-word';
+    if (isExcelFile(path)) return 'icon-excel';
+    return 'icon-other';
+  };
+
+  const getFileIconLabel = (path: string) => {
+    if (isPdfFile(path)) return 'PDF';
+    if (isWordFile(path)) return 'DOC';
+    if (isExcelFile(path)) return 'XLS';
+    return 'FILE';
+  };
+
+  const onPreviewAnnex = (file: string, allFiles: string[]) => {
+    if (isImgFile(file)) {
+      // 图片：找出所有图片，支持多图滑动预览
+      const imgFiles = allFiles.filter(isImgFile);
+      const idx = imgFiles.indexOf(file);
+      showImagePreview({
+        images: imgFiles.map(getFileUrl),
+        startPosition: idx >= 0 ? idx : 0,
+      });
+    } else if (isPdfFile(file)) {
+      // PDF：走后端预览接口，拿到可访问的 URL 后新标签页打开
+      showToast({ message: '加载中...', duration: 0, forbidClick: true });
+      previewFile(file)
+        .then((url) => {
+          showToast('');
+          window.open(url, '_blank');
+        })
+        .catch(() => {
+          showToast('预览失败，请稍后重试');
+        });
+    } else {
+      // Word / Excel：直接触发下载
+      window.open(getFileUrl(file), '_blank');
+    }
   };
 
   // ─── 筛选面板（安全部专属） ──────────────────────────────────
@@ -836,6 +960,122 @@
   padding: 2px 8px;
   border-radius: 4px;
   font-size: 12px;
+}
+
+// ─── 转交原因 ─────────────────────────────────────────────────
+.history-card__remark {
+  margin-top: 6px;
+  padding: 7px 10px;
+  background: #f7f8fa;
+  border-radius: 6px;
+  font-size: 12px;
+  line-height: 1.6;
+  color: #646566;
+
+  .remark-label {
+    color: #969799;
+    white-space: nowrap;
+  }
+
+  .remark-text {
+    color: #323233;
+    word-break: break-all;
+  }
+}
+
+// ─── 转交文件 ─────────────────────────────────────────────────
+.history-card__annex {
+  margin-top: 8px;
+  border: 1px solid #ebedf0;
+  border-radius: 6px;
+  overflow: hidden;
+
+  .annex-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 10px;
+    background: #fafafa;
+    cursor: pointer;
+    user-select: none;
+
+    .annex-label {
+      font-size: 12px;
+      color: #646566;
+      display: flex;
+      align-items: center;
+    }
+  }
+
+  .annex-list {
+    padding: 8px 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .annex-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    padding: 4px 6px;
+    border-radius: 6px;
+    transition: background 0.15s;
+
+    &:active {
+      background: #f0f7ff;
+    }
+
+    .annex-thumb {
+      flex-shrink: 0;
+      border-radius: 4px;
+      border: 1px solid #ebedf0;
+    }
+
+    .annex-icon {
+      flex-shrink: 0;
+      width: 40px;
+      height: 40px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      span {
+        font-size: 11px;
+        font-weight: 700;
+        color: #fff;
+        letter-spacing: 0.5px;
+      }
+
+      &.icon-pdf {
+        background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+      }
+
+      &.icon-word {
+        background: linear-gradient(135deg, #5b9bd5, #2e75b6);
+      }
+
+      &.icon-excel {
+        background: linear-gradient(135deg, #70b15c, #217346);
+      }
+
+      &.icon-other {
+        background: linear-gradient(135deg, #a0a0a0, #707070);
+      }
+    }
+
+    .annex-name {
+      flex: 1;
+      font-size: 12px;
+      color: #323233;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      min-width: 0;
+    }
+  }
 }
 
 // ─── 筛选抽屉 ────────────────────────────────────────────────
