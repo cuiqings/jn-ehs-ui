@@ -124,6 +124,16 @@ export default defineComponent({
       type: Boolean,
       default: false,
     },
+    // 外部传入完整图片列表，用于多图预览切换
+    previewImageList: {
+      type: Array as PropType<string[]>,
+      default: () => [],
+    },
+    // 当前图片在列表中的索引
+    previewIndex: {
+      type: Number,
+      default: 0,
+    },
   },
   emits: ['options-change', 'change', 'update:value'],
   setup(props, { emit }) {
@@ -398,11 +408,20 @@ export default defineComponent({
      */
     function handlePreview(file) {
       previewImage.value = file.url || file.thumbUrl;
-      // previewVisible.value = true;
-      createImgPreview({ 
-        scaleStep: 5,
-        imageList: [previewImage.value] 
-      })
+      // 如果外部传入了完整图片列表，用外部列表多图预览
+      if (props.previewImageList && props.previewImageList.length > 0) {
+        const fullUrls = (props.previewImageList as string[]).map((u) => getFileAccessHttpUrl(u));
+        createImgPreview({
+          scaleStep: 5,
+          imageList: fullUrls,
+          index: props.previewIndex,
+        });
+      } else {
+        createImgPreview({
+          scaleStep: 5,
+          imageList: [previewImage.value],
+        });
+      }
     }
     function handleCancel() {
       previewVisible.value = false;

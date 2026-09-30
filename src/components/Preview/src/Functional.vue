@@ -119,7 +119,7 @@
 
       const getScaleStep = computed(() => {
         const scaleStep = props?.scaleStep ?? 0;
-        if (scaleStep ?? (0 > 0 && scaleStep < 100)) {
+        if (scaleStep > 0 && scaleStep < 100) {
           return scaleStep / 100;
         } else {
           return imgState.imgScale / 10;
@@ -144,6 +144,7 @@
       // 缩放函数
       function scaleFunc(num: number) {
         if (imgState.imgScale <= 0.2 && num < 0) return;
+        if (imgState.imgScale >= 10 && num > 0) return;
         imgState.imgScale += num;
       }
 

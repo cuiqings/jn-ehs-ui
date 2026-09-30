@@ -10,9 +10,16 @@
           class="img-item"
           v-for="(url, idx) in group.urlList"
           :key="idx"
-          @click="handlePreview(group.urlList, idx)"
         >
-          <JImageUpload :value="url" disabled text="" bizPath="hiddenTrouble" :fileMax="1" />
+          <JImageUpload
+            :value="url"
+            disabled
+            text=""
+            bizPath="hiddenTrouble"
+            :fileMax="1"
+            :previewImageList="group.urlList"
+            :previewIndex="idx"
+          />
         </div>
       </div>
     </div>
@@ -23,8 +30,6 @@
   import { computed } from 'vue';
   import { JImageUpload } from '/@/components/Form';
   import { resolveCheckImgGroups } from '../constants/checkImg';
-  import { getFileAccessHttpUrl } from '/@/utils/common/compUtils';
-  import { createImgPreview } from '/@/components/Preview/index';
 
   const props = defineProps({
     record: {
@@ -44,11 +49,6 @@
       return { ...group, urlList };
     });
   });
-
-  function handlePreview(urlList: string[], index: number) {
-    const fullUrls = urlList.map((u) => getFileAccessHttpUrl(u));
-    createImgPreview({ imageList: fullUrls, index });
-  }
 </script>
 
 <style lang="less" scoped>
@@ -82,6 +82,20 @@
 
   .img-item {
     flex: 0 0 auto;
+    cursor: pointer;
+
+    .thumb-img {
+      width: 80px;
+      height: 80px;
+      object-fit: cover;
+      border-radius: 4px;
+      border: 1px solid #e8e8e8;
+      transition: opacity 0.2s;
+
+      &:hover {
+        opacity: 0.85;
+      }
+    }
   }
 }
 </style>
