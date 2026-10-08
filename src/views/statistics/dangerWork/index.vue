@@ -874,7 +874,7 @@
     let res = await getWorkTypeData(queryParams.value).finally(() => {
       loading2.value = false;
     });
-    let max = computedMax(res.levelOne, res.levelTwo, res.levelThree, res.levelFour, res.levelFive, res.levelSix, res.levelSeven, res.levelNine);
+    let max = computedMax(res.levelOne, res.levelTwo, res.levelThree, res.levelFour, res.levelFive, res.levelSix, res.levelSeven, res.levelNine, res.levelTen || []);
     lineBarRef2.value.initCharts({
       title: '各单位危险作业类型统计',
       barWidth: 10,
@@ -983,6 +983,16 @@
           },
           data: res.levelSeven,
           color: '#255e91',
+        },
+        {
+          name: '电气作业',
+          type: 'bar',
+          label: {
+            show: true,
+            position: 'top',
+          },
+          data: res.levelTen || [],
+          color: '#00BCD4',
         },
         {
           name: '其他',

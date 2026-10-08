@@ -97,12 +97,17 @@
           <a-input placeholder="请输入" disabled :max-length="4" v-model:value="formState.hoistingWeight" />
         </a-form-item>
       </a-col>
-      <a-col :span="12" v-if="['1', '3', '4'].includes(formState.workType as string)">
+      <a-col :span="12" v-if="formState.workType == '10'">
+        <a-form-item label="作业电压(kV)" :colon="false" name="operatingVoltageKv">
+          <a-input placeholder="请输入" disabled v-model:value="formState.operatingVoltageKv" />
+        </a-form-item>
+      </a-col>
+      <a-col :span="12" v-if="['1', '3', '4', '10'].includes(String(formState.workType))">
         <a-form-item label="作业等级" :colon="false" name="workGrade">
           <a-select
             :disabled="readonly"
             v-model:value="formState.workGrade"
-            :options="workGradeList[formState.workType]"
+            :options="String(formState.workType) === '10' ? levelList : workGradeList[formState.workType]"
             :field-names="{ label: 'label', value: 'value' }"
             placeholder="请选择"
           />

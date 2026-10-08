@@ -4,6 +4,7 @@ export const usePublicData = () => {
   const levelList = [
     { label: '一级', value: '一级' },
     { label: '二级', value: '二级' },
+    { label: '三级', value: '三级' },
   ];
 
   const workGradeList = {
