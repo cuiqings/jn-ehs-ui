@@ -20,6 +20,7 @@
     6: '/app/dangerousWork/approvedetail',
     7: '/app/dangerousWork/approvedetail',
     9: '/app/dangerousWork/approvedetail',
+    10: '/app/dangerousWork/approvedetail',
     8: '/app/unhazardousWork/approvedetail',
     100: '/app/dangerousWork/manage',
     101: '/app/unhazardousWork/manage',
