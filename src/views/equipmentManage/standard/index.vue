@@ -70,6 +70,9 @@
           <a-button v-auth="'equipmentManage-standard:download'" preIcon="ant-design:download-outlined" type="primary" @click="onDownload">
             导入模版下载
           </a-button>
+          <a-button preIcon="ant-design:export-outlined" type="primary" @click="onExportXls">
+            导出
+          </a-button>
           <a-button
             v-auth="'equipmentManage-standard:addMaterial'"
             :disabled="isEditing"
@@ -482,6 +485,12 @@
   const onDownload = () => {
     const name = orgOptions.value.find((item) => item.value === selectedMenu.value[0])?.label;
     handleExportXlsx(`劳保发放标准（${name}）-模板`, '/lb/lbDistributeStandard/downloadImportTemplate', {
+      orgCode: selectedMenu.value[0],
+    });
+  };
+  const onExportXls = () => {
+    const name = orgOptions.value.find((item) => item.value === selectedMenu.value[0])?.label;
+    handleExportXlsx(`劳保发放标准（${name}）`, '/lb/lbDistributeStandard/exportXls', {
       orgCode: selectedMenu.value[0],
     });
   };

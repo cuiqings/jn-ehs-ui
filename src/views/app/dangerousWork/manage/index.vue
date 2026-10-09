@@ -162,7 +162,7 @@
                 type="primary"
                 size="mini"
                 v-auth="'WorkRequisition:end'"
-                v-if="!['1', '2', '3', '4'].includes(item.workType)"
+                v-if="!['1', '2', '3', '4', '10'].includes(item.workType)"
                 @click.stop="finishWorkFn(item)"
               >
                 结束作业

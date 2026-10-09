@@ -81,7 +81,7 @@ export const computedStepData = async () => {
     //   obj.show = false;
     // }
 
-    if (nodes.includes(item) && ['1', '4', '3'].includes(detail.workType)) {
+    if (nodes.includes(item) && ['1', '4', '3', '10'].includes(detail.workType)) {
       obj.show = true;
       obj.needNode = false;
     }
@@ -186,7 +186,7 @@ export const computedStepData = async () => {
   console.log(result);
   
   // 如果申请单位和作业点位相同 删除作业单位负责人和作业单位安全部门节点
-  if (detail.applicationUnit == detail.workUnit && ['1', '2', '3', '4', '9'].includes(detail.workType)) {
+  if (detail.applicationUnit == detail.workUnit && ['1', '2', '3', '4', '9', '10'].includes(detail.workType)) {
     result = result.filter((item) => item.nodeName != '作业单位负责人(车间主任)');
     result = result.filter((item) => item.nodeName != '作业单位安全部门(安全科长)');
   }

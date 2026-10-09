@@ -15,6 +15,12 @@ const workTimeValidation = (workType: string, data: any) => {
         } else {
             return true;
         }
+    } else if (workType === '10') {
+        if (new Date(time[1]).getTime() - new Date(time[0]).getTime() > 7 * 24 * 60 * 60 * 1000) {
+            return '电气作业的作业实施时间最长为7天！';
+        } else {
+            return true;
+        }
     } else if (workType === '2') {
         if (new Date(time[1]).getTime() - new Date(time[0]).getTime() > 24 * 60 * 60 * 1000 + 3000) {
             return '有限空间的作业实施时间最长为24小时！';

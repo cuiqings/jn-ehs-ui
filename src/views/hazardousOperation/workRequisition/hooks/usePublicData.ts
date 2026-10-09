@@ -318,6 +318,24 @@ export const usePublicData = () => {
         },
         trigger: 'change',
       };
+    } else if (workType === '10') {
+      return {
+        type: 'array',
+        required: true,
+        validator: (_rule, time) => {
+          if (!time) return Promise.reject('请选择作业实施时间！');
+          if (time.length > 0) {
+            if (new Date(time[1]).getTime() - new Date(time[0]).getTime() > 7 * 24 * 60 * 60 * 1000) {
+              return Promise.reject('电气作业的作业实施时间最长为7天！');
+            } else {
+              return Promise.resolve();
+            }
+          } else {
+            return Promise.reject('请输入作业实施时间！');
+          }
+        },
+        trigger: 'change',
+      };
     } else if (workType === '2') {
       return {
         type: 'array',
