@@ -34,8 +34,10 @@
     sign: '',
   });
   const curId = ref(null);
+  const isLastApproval = ref(false);
   const [registerModal, { closeModal }] = useModalInner((data) => {
     curId.value = data.id;
+    isLastApproval.value = !!data.isLastApproval;
     if (userInfo.value.signature) {
       if (/^http/i.test(userInfo.value.signature)) formState.sign = userInfo.value.signature;
     }
@@ -53,7 +55,7 @@
           id: curId.value,
           sign: formState.sign
         }).then(() => {
-          emit('close');
+          emit('close', isLastApproval.value);
           closeModal();
           confirmLoading.value = false;
         })

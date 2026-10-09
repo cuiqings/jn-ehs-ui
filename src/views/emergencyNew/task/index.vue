@@ -54,7 +54,6 @@
                   @click="approveClick(item, '演练记录')"
                   >演练记录</a-button
                 >
-                <a-button v-if="item.approvalStatus === '1'" type="primary" @click="approveClick(item, '演练总结')">演练总结</a-button>
                 <a-button type="primary" @click="viewDetail(item)">查看详情</a-button>
               </a-space>
             </div>

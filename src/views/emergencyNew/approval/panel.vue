@@ -59,9 +59,7 @@
   const { registerForm, getFieldsValue, registerDrawer, openDrawer, orgTree, setFieldsValue } = useContent();
 
   onMounted(() => {
-    setTimeout(() => {
-      pageInit();
-    }, 200);
+    pageInit();
   });
   // 总条数
   const total = ref(0);
@@ -82,6 +80,11 @@
   };
 
   async function pageInit() {
+    const start = Date.now();
+    while ((!orgTree.value || orgTree.value.length === 0) && Date.now() - start < 3000) {
+      await new Promise(resolve => setTimeout(resolve, 50));
+    }
+    if (!orgTree.value || orgTree.value.length === 0) return;
     Object.assign(queryParams.value, getFieldsValue());
     setFieldsValue({ orgCode: orgTree.value[0].key })
     if(!queryParams.value.orgCode) queryParams.value.orgCode = orgTree.value[0].key;

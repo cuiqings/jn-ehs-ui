@@ -2,7 +2,7 @@
   <BasicDrawer v-bind="$attrs" @register="register" @close="close" :title="title" width="1300px" style="padding-bottom: 60px;">
     <plan-form ref="formElRef" :detail="detail" :disabled="disabled" @cancel="closeDrawer"
       @submit="closeDrawer"></plan-form>
-    <div class="step-tit">演练记录 <a-button type="primary" :loading="submitIng" @click="download">下载演练记录</a-button></div>
+    <div class="step-tit">演练记录</div>
     <a-form :model="formState" ref="contentFormElRef" name="basic" :layout="'vertical'" :label-col="{ span: 3 }"
       :wrapper-col="{ span: 16 }">
       <div class="form-main">
@@ -75,10 +75,9 @@
 <script lang="ts" setup>
 import { JUpload } from '/@/components/Form/src/jeecg/components/JUpload';
 import { BasicDrawer, useDrawerInner } from '/@/components/Drawer';
-import { taskDetail, drillTaskView, downloadTrainRecord } from '../api';
+import { taskDetail, drillTaskView } from '../api';
 import planForm from './components/planForm.vue';
 import type { FormInstance } from 'ant-design-vue';
-import dayjs from 'dayjs';
 import { ref } from 'vue';
 import {getFileAccessHttpUrl} from "/@/utils/common/compUtils";
 
@@ -128,27 +127,6 @@ const getHtml = (type) => {
     htmlContent.value = res;
     htmlTitle.value = titmap[type];
     htmlShow.value = true;
-  })
-}
-
-const submitIng = ref(false)
-const download = () => {
-  submitIng.value = true
-  downloadTrainRecord(detail.value.id).then(res => {
-    let blobOptions = { type: 'application/vnd.zip' };
-    let fileSuffix = '.zip';
-    let url = window.URL.createObjectURL(new Blob([res], blobOptions));
-    let link = document.createElement('a');
-    link.style.display = 'none';
-    link.href = url;
-    link.setAttribute('download', `演练记录-${dayjs(new Date()).format('YYYY-MM-DD')}${fileSuffix}`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    window.URL.revokeObjectURL(url);
-    submitIng.value = false
-  }).catch(e => {
-    submitIng.value = false
   })
 }
 

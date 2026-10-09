@@ -85,6 +85,11 @@
   };
 
   async function pageInit() { 
+    const start = Date.now();
+    while ((!orgTree.value || orgTree.value.length === 0) && Date.now() - start < 3000) {
+      await new Promise(resolve => setTimeout(resolve, 50));
+    }
+    if (!orgTree.value || orgTree.value.length === 0) return;
     Object.assign(queryParams.value, getFieldsValue());
     if(!queryParams.value.orgCode) queryParams.value.orgCode = orgTree.value[0].key;
     setFieldsValue({ orgCode: orgTree.value[0].key })

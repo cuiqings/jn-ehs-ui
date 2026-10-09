@@ -102,7 +102,7 @@
 </template>
 <script lang="ts" setup>
 import AppCustomizeUpload from '../../components/AppCustomizeUpload.vue';
-import { approvalDetail, approval, drillTaskView } from '/@/views/emergencyNew/api'
+import { approvalDetail, approval, drillTaskView, drillSummary, taskDetail } from '/@/views/emergencyNew/api'
 import { getFileAccessHttpUrl } from '/@/utils/common/compUtils';
 import { useRoute, useRouter } from 'vue-router';
 import Sign from '../../components/sign.vue';
@@ -124,7 +124,23 @@ const formState = ref<any>({
     purpose: [],
     record: [],
     rescue: [],
-    reviewContent: []
+    reviewContent: [],
+    purpose1: '',
+    record1: '',
+    rescue1: '',
+    drillCorrective: '',
+    drillSummary: '',
+    personArrival: ['迅速准确、按时到位'],
+    workMaterial: ['充分、有效'],
+    personalProtection: ['防护到位'],
+    overallOrganization: ['准确、高效、满足要求'],
+    organizationDivision: ['安全、快速'],
+    practicalEffect: ['达到预期目标'],
+    reportSuperior: ['报告及时'],
+    safetyDepartment: ['按要求协作'],
+    rescueEffect: ['按要求协作'],
+    alertCooperation: ['按要求配合'],
+    aqb: '应急演练安全部审批人'
 })
 
 const pageInit = async () => {
@@ -138,6 +154,9 @@ const pageInit = async () => {
     if (userInfo?.signature) {
         if (/^http/i.test(userInfo.signature)) signature.value = userInfo.signature;
     }
+    const taskRes = await taskDetail(route.query.id)
+    if (taskRes.drillSummary) formState.value.drillSummary = Array.isArray(taskRes.drillSummary) ? taskRes.drillSummary.join(',') : taskRes.drillSummary;
+    if (taskRes.drillCorrective) formState.value.drillCorrective = Array.isArray(taskRes.drillCorrective) ? taskRes.drillCorrective.join(',') : taskRes.drillCorrective;
 }
 pageInit()
 
@@ -159,7 +178,13 @@ const beforeClose = async (s) => {
         approval({
             id: getId(),
             sign: signature.value
-        }).then(() => {
+        }).then(async () => {
+            if (isLastApproval()) {
+                const params: any = JSON.parse(JSON.stringify(formState.value));
+                if (params.drillSummary) params.drillSummary = params.drillSummary.split(',');
+                if (params.drillCorrective) params.drillCorrective = params.drillCorrective.split(',');
+                await drillSummary(params);
+            }
             resolve(true)
             show.value = false;
             submitIng.value = false;
@@ -180,6 +205,15 @@ const getId = () => {
     }
     return nodeId;
 }
+const isLastApproval = () => {
+    const list = detailInfo.value.examineList || [];
+    for (let i = 0; i < list.length; i++) {
+        if (list[i].status === null) {
+            return i === list.length - 1;
+        }
+    }
+    return false;
+};
 const failShow = ref(false)
 const backReason = ref('')
 const failSubmit = async () => {

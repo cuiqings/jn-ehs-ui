@@ -100,7 +100,7 @@
 import { JUpload } from '/@/components/Form/src/jeecg/components/JUpload';
 import { BasicDrawer, useDrawerInner } from '/@/components/Drawer';
 import { getFileAccessHttpUrl } from '/@/utils/common/compUtils';
-import {approval, approvalDetail, drillTaskView} from '../api';
+import {approval, approvalDetail, drillTaskView, drillSummary, taskDetail} from '../api';
 import signModal from './components/signModal.vue';
 import planForm from './components/planForm.vue';
 import { useModal } from '/@/components/Modal';
@@ -129,17 +129,38 @@ const [register, { closeDrawer }] = useDrawerInner((data) => {
       Object.assign(formState.value, res);
       console.log(formState.value);
     });
+    taskDetail(data.id).then((res) => {
+      if (res.drillSummary) formState.value.drillSummary = Array.isArray(res.drillSummary) ? res.drillSummary.join(',') : res.drillSummary;
+      if (res.drillCorrective) formState.value.drillCorrective = Array.isArray(res.drillCorrective) ? res.drillCorrective.join(',') : res.drillCorrective;
+    });
   }
 });
 
-const formState = ref<any>({})
+const formState = ref<any>({
+  purpose1: '',
+  record1: '',
+  rescue1: '',
+  drillCorrective: '',
+  drillSummary: '',
+  personArrival: ['迅速准确、按时到位'],
+  workMaterial: ['充分、有效'],
+  personalProtection: ['防护到位'],
+  overallOrganization: ['准确、高效、满足要求'],
+  organizationDivision: ['安全、快速'],
+  practicalEffect: ['达到预期目标'],
+  reportSuperior: ['报告及时'],
+  safetyDepartment: ['按要求协作'],
+  rescueEffect: ['按要求协作'],
+  alertCooperation: ['按要求配合'],
+  aqb: '应急演练安全部审批人'
+})
 
 const [registerSignModal, { openModal: openSignModal }] = useModal();
 
 const submitFn = async () => {
   await contentFormElRef.value?.validate()
   submitIng.value = true;
-  openSignModal(true, { id: getId() })
+  openSignModal(true, { id: getId(), isLastApproval: isLastApproval() })
 }
 const getId = () => {
   let nodeId = '';
@@ -151,8 +172,23 @@ const getId = () => {
   }
   return nodeId;
 }
+const isLastApproval = () => {
+  const list = detail.value.examineList || [];
+  for (let i = 0; i < list.length; i++) {
+    if (list[i].status === null) {
+      return i === list.length - 1;
+    }
+  }
+  return false;
+};
 
-const signSuccess = () => {
+const signSuccess = async (isLast) => {
+  if (isLast) {
+    const params: any = JSON.parse(JSON.stringify(formState.value));
+    if (params.drillSummary) params.drillSummary = params.drillSummary.split(',');
+    if (params.drillCorrective) params.drillCorrective = params.drillCorrective.split(',');
+    await drillSummary(params);
+  }
   emits('success')
   closeDrawer();
 }

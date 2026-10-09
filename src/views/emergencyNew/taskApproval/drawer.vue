@@ -176,7 +176,7 @@
 <script lang="ts" setup>
 import { JUpload } from '/@/components/Form/src/jeecg/components/JUpload';
 import { BasicDrawer, useDrawerInner } from '/@/components/Drawer';
-import { videoData, drillScheme, taskDetail, trainContent, drillRecord } from '../api';
+import { videoData, drillScheme, taskDetail, trainContent, drillRecord, drillSummary } from '../api';
 import signModal from './components/signModal.vue';
 import planForm from './components/planForm.vue';
 import { JUserModal } from '/@/components/Form';
@@ -352,7 +352,7 @@ const submitFn = async () => {
     })
     return false;
   }
-  openSignModal(true, { id: getId() })
+  openSignModal(true, { id: getId(), isLastApproval: isLastApproval() })
 }
 const getId = () => {
   let nodeId = '';
@@ -364,8 +364,41 @@ const getId = () => {
   }
   return nodeId;
 }
+const isLastApproval = () => {
+  const list = detail.value.examineList || [];
+  console.log('[演练总结调试] isLastApproval examineList=', JSON.parse(JSON.stringify(list)));
+  let result = false;
+  for (let i = 0; i < list.length; i++) {
+    if (list[i].state === null) {
+      result = i === list.length - 1;
+      console.log('[演练总结调试] 当前节点 index=', i, '是否最后一关=', result);
+      break;
+    }
+  }
+  console.log('[演练总结调试] isLastApproval 最终返回=', result);
+  return result;
+};
 
-const signSuccess = () => {
+const signSuccess = async (isLast) => {
+  console.log('[演练总结调试] signSuccess isLast=', isLast);
+  console.log('[演练总结调试] formState.value.id=', formState.value.id);
+  console.log('[演练总结调试] detail.value=', JSON.parse(JSON.stringify(detail.value || {})));
+  if (isLast) {
+    const params: any = { id: formState.value.id };
+    const ds = detail.value.drillSummary;
+    const dc = detail.value.drillCorrective;
+    if (ds) params.drillSummary = Array.isArray(ds) ? ds : String(ds).split(',');
+    if (dc) params.drillCorrective = Array.isArray(dc) ? dc : String(dc).split(',');
+    console.log('[演练总结调试] 调用 drillSummary, params=', params);
+    try {
+      const res = await drillSummary(params);
+      console.log('[演练总结调试] drillSummary 成功, res=', res);
+    } catch (e) {
+      console.error('[演练总结调试] drillSummary 失败', e);
+    }
+  } else {
+    console.log('[演练总结调试] 非最后一关，不调用 drillSummary');
+  }
   emits('success')
   closeDrawer();
 }
