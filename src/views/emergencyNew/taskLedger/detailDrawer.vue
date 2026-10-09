@@ -139,12 +139,22 @@
   const htmlToPdfBlob = async (htmlStr: string): Promise<Blob> => {
     const { default: html2canvas } = await import('html2canvas');
     const { jsPDF } = await import('jspdf');
-    const container = document.createElement('div');
-    container.style.cssText = 'position:fixed;left:-99999px;top:-99999px;width:794px;background:#fff;padding:20px;visibility:hidden;pointer-events:none;z-index:-9999;';
-    container.innerHTML = htmlStr;
-    document.body.appendChild(container);
-    const canvas = await html2canvas(container, { scale: 1.5, useCORS: true, logging: false });
-    document.body.removeChild(container);
+    // 用隐藏 iframe 隔离 html2canvas 渲染过程，避免主页面重排导致闪动
+    const iframe = document.createElement('iframe');
+    iframe.style.cssText = 'position:fixed;left:-99999px;top:-99999px;width:794px;height:0;border:0;visibility:hidden;';
+    document.body.appendChild(iframe);
+    const iframeDoc = iframe.contentDocument!;
+    iframeDoc.open();
+    iframeDoc.write(`<html><head><meta charset="utf-8"><style>html,body{margin:0;padding:0;background:#fff;font-family:sans-serif;}body{padding:20px;}</style></head><body>${htmlStr}</body></html>`);
+    iframeDoc.close();
+    // 等 iframe 内容渲染完成
+    await new Promise(resolve => setTimeout(resolve, 300));
+    let canvas;
+    try {
+      canvas = await html2canvas(iframeDoc.body, { scale: 1.5, useCORS: true, logging: false });
+    } finally {
+      document.body.removeChild(iframe);
+    }
     const pdf = new jsPDF('p', 'mm', 'a4');
     const imgW = 190;
     const imgH = (canvas.height * imgW) / canvas.width;
