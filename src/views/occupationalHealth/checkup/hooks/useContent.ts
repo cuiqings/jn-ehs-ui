@@ -78,6 +78,14 @@ export const useContent = () => {
         return tabActive.value == '1';
       },
     },
+    {
+      title: '无需体检附件',
+      dataIndex: 'annex',
+      slots: { customRender: 'annex' },
+      ifShow: () => {
+        return tabActive.value == '1';
+      },
+    },
   ];
   const orgList = ref<any[]>([]);
   //表单搜索字段
@@ -459,21 +467,23 @@ export const useContent = () => {
 
   // 无需体检逻辑
   const openNocheck = ref(false);
-  const formState = ref({ reason: undefined });
+  const formState = ref({ reason: undefined, annex: undefined });
   const noCheckFormRef = ref<FormInstance | null>(null);
   const curRecord = ref<any>({});
   const noCheckOk = () => {
     noCheckFormRef.value?.validate().then(() => {
-      updState({ id: curRecord.value.id, state: 1, reason: formState.value.reason }).then(() => {
+      updState({ id: curRecord.value.id, state: 1, reason: formState.value.reason, annex: formState.value.annex }).then(() => {
         reload();
         openNocheck.value = false;
         formState.value.reason = undefined;
+        formState.value.annex = undefined;
       });
     });
   };
   const noCheckCancel = () => {
     openNocheck.value = false;
     formState.value.reason = undefined;
+    formState.value.annex = undefined;
   };
   return {
     getForm,

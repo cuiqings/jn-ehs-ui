@@ -52,12 +52,23 @@
       <template #checkResult="{ record }">{{
         { 1: '未见异常', 2: '疑似职业病', 3: '禁忌证', 4: '其他疾患', 5: '复查' }[record.checkResult]
       }}</template>
+      <template #annex="{ record }">
+        <div v-if="getAnnexList(record.annex).length" style="display: flex; flex-direction: column; align-items: flex-start; gap: 2px">
+          <a v-for="(url, idx) in getAnnexList(record.annex)" :key="idx" :title="getFileName(url)" style="color: #1890ff" @click="handleAnnexClick(url)">{{
+            getDisplayName(url)
+          }}</a>
+        </div>
+        <span v-else>-</span>
+      </template>
     </BasicTable>
     <DrawerView @register="registerDrawer" @submit-success="submitSuccess" />
     <a-modal v-model:visible="openNocheck" title="无需体检" @ok="noCheckOk" @cancel="noCheckCancel" :bodyStyle="{ padding: '16px' }" width="500">
       <a-form :model="formState" layout="vertical" autocomplete="off" ref="noCheckFormRef">
         <a-form-item label="原因" name="reason" :rules="[{ required: true, message: '请输入无需体检原因！' }]">
           <a-textarea placeholder="请输入无需体检原因" v-model:value="formState.reason" :auto-size="{ minRows: 2, maxRows: 5 }" />
+        </a-form-item>
+        <a-form-item label="上传附件" name="annex" :rules="[{ required: true, message: '请上传附件！' }]">
+          <JUpload :maxCount="5" v-model:value="formState.annex" text="上传附件" />
         </a-form-item>
       </a-form>
     </a-modal>
@@ -66,6 +77,11 @@
 
 <script lang="ts" name="occupationalHealth-checkup" setup>
   import { BasicTable, TableAction } from '/@/components/Table';
+  import { JUpload } from '/@/components/Form/src/jeecg/components/JUpload';
+  import { getFileAccessHttpUrl } from '/@/utils/common/compUtils';
+  import { previewFile } from '/@/api/common/api';
+  import { createImgPreview } from '/@/components/Preview/index';
+  import { downloadFile } from '/@/utils/common/renderUtils';
   import { useContent } from './hooks/useContent';
   import DrawerView from './drawer.vue';
   const {
@@ -95,6 +111,39 @@
       });
     str = str.substring(0, str.length - 1);
     return str;
+  };
+  // 兼容后端返回的附件字段为字符串（逗号分隔）或数组的情况
+  const getAnnexList = (annex) => {
+    if (!annex) return [];
+    if (Array.isArray(annex)) return annex.filter(Boolean);
+    if (typeof annex === 'string') return annex.split(',').filter(Boolean);
+    return [];
+  };
+  // 根据扩展名判断文件类型
+  const imageExts = ['png', 'jpg', 'jpeg', 'gif', 'bmp', 'webp'];
+  const isImageFile = (url) => imageExts.includes(String(url).split('.').pop().toLowerCase());
+  const isPdfFile = (url) => String(url).split('.').pop().toLowerCase() === 'pdf';
+  // 从文件路径中提取文件名
+  const getFileName = (path) => {
+    let p = String(path).replace(/\\/g, '/');
+    return p.substring(p.lastIndexOf('/') + 1);
+  };
+  // 文件名超过15个字符时截断显示省略号
+  const getDisplayName = (url) => {
+    const name = getFileName(url);
+    return name.length > 15 ? name.slice(0, 12) + '...' : name;
+  };
+  // 附件点击：图片放大预览，pdf 在线预览，word/excel 下载
+  const handleAnnexClick = (url) => {
+    if (isImageFile(url)) {
+      createImgPreview({ imageList: [getFileAccessHttpUrl(url)], maskClosable: true });
+    } else if (isPdfFile(url)) {
+      previewFile(url).then((res) => {
+        window.open(res, '_blank');
+      });
+    } else {
+      downloadFile(url, getFileName(url));
+    }
   };
 </script>
 <style lang="less" scoped>

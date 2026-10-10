@@ -106,6 +106,10 @@
           rows="3"
           autosize
           type="textarea" placeholder="请输入无需体检原因" />
+        <div style="padding: 0 16px 16px;">
+          <div style="font-size: 14px; color: #323233; margin-bottom: 8px;"><span style="color: #ee0a24;">*</span> 上传附件：</div>
+          <AppUpload :maxCount="5" v-model:fileList="annex" />
+        </div>
       </van-form>
 
     </van-dialog>
@@ -208,6 +212,7 @@
   import { getDepart3ListWithSecurity, selectDeptNew } from '/@/api/common/api';
   import { physicalExaminationList, physicalExaminationDel, updState } from '/@/views/occupationalHealth/api';
   import SearchWrap from '../components/searchWrap.vue';
+  import AppUpload from '../components/AppUpload.vue';
   import { ref, nextTick, onMounted } from 'vue';
   import { showConfirmDialog, showFailToast } from 'vant';
   import List from './components/list.vue';
@@ -307,6 +312,7 @@
   // 无需体检弹框
   const dialogShow = ref(false);
   const reason = ref('');
+  const annex = ref('');
   const loading = ref(false);
   const applicationUnitList = ref<any[]>([]);
   onMounted(async () => {
@@ -448,6 +454,7 @@
         dialogShow.value = false
         curItem.value.status = '待体检'
         reason.value = '';
+        annex.value = '';
       }).catch(_ => {
         showFailToast({
           message: '操作失败',
@@ -460,20 +467,33 @@
   }
   const dialogCancel = (c) => {
     reason.value = '';
+    annex.value = '';
   }
 
   const beforeClose = (c) => {
-    if(c == 'cancel') return true;
+    if(c == 'cancel') {
+      reason.value = '';
+      annex.value = '';
+      return true;
+    }
     return new Promise((resolve, rej) => {
+      if (!annex.value) {
+        showFailToast({
+          message: '请上传附件',
+        });
+        return resolve(false);
+      }
       formRef.value.validate().then(res => { 
         updState({
           id: curItem.value.id,
           reason: reason.value,
+          annex: annex.value,
           status: 1
         }).then(_ => {
           dialogShow.value = false
           curItem.value.status = '无需体检'
           reason.value = '';
+          annex.value = '';
           resolve(true)
         }).catch(_ => {
           showFailToast({
